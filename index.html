@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>21st Open · Tom Brown Park</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0b1a0b;
+      --surface:    #142014;
+      --surface2:   #1c2e1c;
+      --border:     #273a27;
+      --accent:     #a8ff2e;
+      --accent-dim: rgba(168,255,46,.12);
+      --text:       #dff5df;
+      --muted:      #5e8060;
+      --ob:         #ff7b3a;
+      --mando:      #ffd93d;
+      --note-clr:   #5bb8ff;
+      --par4-clr:   #5bb8ff;
+      --par5-clr:   #ff9f6a;
+      --hdr: 72px;
+      --ftr: 76px;
+    }
+
+    html, body {
+      height: 100%; width: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── LOGIN ───────────────────────────────────── */
+    .login-wrap {
+      display: none; position: fixed; inset: 0;
+      background: var(--bg); z-index: 400;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .login-wrap.show { display: flex; }
+    .login-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 22px; padding: 32px 24px 28px;
+      width: 100%; max-width: 360px; text-align: center;
+    }
+    .login-icon  { font-size: 44px; margin-bottom: 14px; }
+    .login-title { font-family:'Bebas Neue',cursive; font-size:30px; letter-spacing:2px; margin-bottom:6px; }
+    .login-sub   { font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:22px; }
+    .login-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 11px; padding: 13px 16px; color: var(--text);
+      font-family:'Barlow',sans-serif; font-size:17px; text-align:center;
+      outline: none; margin-bottom: 12px; transition: border-color .2s;
+      -webkit-appearance: none;
+    }
+    .login-input:focus { border-color: var(--accent); }
+    .login-input::placeholder { color: var(--muted); }
+    .login-btn {
+      width: 100%; background: var(--accent); color: var(--bg);
+      border: none; border-radius: 11px; padding: 14px;
+      font-family:'Bebas Neue',cursive; font-size:19px; letter-spacing:2px;
+      cursor: pointer; transition: opacity .2s;
+    }
+    .login-btn:disabled { opacity: .4; }
+    .login-status { font-size:12px; color:var(--muted); margin-top:12px; min-height:16px; }
+    .login-status.err { color: var(--ob); }
+
+    /* ── HEADER ──────────────────────────────────── */
+    .hdr {
+      position: fixed; inset: 0 0 auto 0; height: var(--hdr);
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 50; padding: 0 14px;
+    }
+    .hdr-center {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+    }
+    .hdr-title {
+      font-family:'Bebas Neue',cursive; font-size:14px; letter-spacing:2.5px;
+      color:var(--muted); text-align:center; line-height:1;
+    }
+    .hdr-title span { color: var(--accent); }
+
+    /* Layout toggle */
+    .layout-toggle {
+      display: flex; gap: 2px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 2px;
+    }
+    .lt-btn {
+      background: none; border: none;
+      color: var(--muted);
+      font-family:'Barlow Condensed',sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 12px; border-radius: 16px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      touch-action: manipulation;
+    }
+    .lt-btn.active { background: var(--accent); color: var(--bg); }
+
+    /* Wind badge */
+    .wind-badge {
+      position: absolute; left: 14px;
+      display: flex; align-items: center; gap: 4px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 5px 10px 5px 8px;
+      cursor: pointer; transition: border-color .2s, opacity .3s;
+      touch-action: manipulation;
+    }
+    .wind-badge:active  { border-color: var(--accent); }
+    .wind-badge.loading { opacity: .4; }
+    .wind-arrow { font-size:13px; display:inline-block; color:var(--accent); transition:transform .6s ease; }
+    .wind-spd   { font-family:'Bebas Neue',cursive; font-size:15px; color:var(--text); line-height:1; }
+    .wind-dir   { font-size:10px; font-weight:700; letter-spacing:.5px; color:var(--muted); }
+
+    .all-btn {
+      position: absolute; right: 14px;
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); font-family:'Barlow',sans-serif;
+      font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+      padding: 6px 11px; cursor: pointer; transition: border-color .2s, color .2s;
+    }
+    .all-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── MAIN ────────────────────────────────────── */
+    .main {
+      position: fixed; top: var(--hdr); bottom: var(--ftr); left: 0; right: 0;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── HOLE CARDS ──────────────────────────────── */
+    .card { display: none; flex-direction: column; min-height: 100%; }
+    .card.active { display: flex; }
+
+    .hero {
+      background: var(--surface); padding: 16px 20px 14px;
+      display: flex; align-items: center; gap: 18px;
+      border-bottom: 2px solid var(--border);
+    }
+    .hero-num  { font-family:'Bebas Neue',cursive; font-size:88px; line-height:.85; color:var(--accent); min-width:72px; text-align:center; }
+    .hero-meta { display:flex; flex-direction:column; gap:5px; }
+    .hero-sub  { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); }
+    .hero-stats { display:flex; align-items:center; gap:14px; }
+    .stat { display:flex; flex-direction:column; align-items:center; }
+    .stat-val  { font-family:'Bebas Neue',cursive; font-size:36px; line-height:1; }
+    .stat-lbl  { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+    .divider   { width:1px; height:40px; background:var(--border); }
+
+    .par3 .par-val { color: var(--accent); }
+    .par4 .par-val { color: var(--par4-clr); }
+    .par5 .par-val { color: var(--par5-clr); }
+
+    .map-wrap  { background:#050d05; border-bottom:1px solid var(--border); text-align:center; }
+    .map-img   { width:100%; display:block; max-height:56vh; object-fit:contain; }
+    .map-missing { padding:55px 20px; color:var(--muted); font-size:12px; letter-spacing:1px; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; }
+    .map-missing span { font-size:28px; display:block; margin-bottom:8px; }
+
+    .section   { padding:16px 18px; border-bottom:1px solid var(--border); }
+    .sec-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+
+    .rule { display:flex; gap:10px; padding:10px 12px; background:var(--surface); border-radius:8px; margin-bottom:7px; border-left:3px solid transparent; font-size:14px; line-height:1.55; }
+    .rule:last-child { margin-bottom:0; }
+    .rule.ob    { border-left-color: var(--ob); }
+    .rule.mando { border-left-color: var(--mando); }
+    .rule.note  { border-left-color: var(--note-clr); }
+    .rule-tag   { flex-shrink:0; align-self:flex-start; border-radius:4px; padding:2px 7px; font-size:10px; font-weight:700; letter-spacing:1px; margin-top:1px; }
+    .tag-ob    { background:rgba(255,123,58,.15); color:var(--ob);       border:1px solid rgba(255,123,58,.35); }
+    .tag-mando { background:rgba(255,217,61,.15); color:var(--mando);    border:1px solid rgba(255,217,61,.35); }
+    .tag-note  { background:rgba(91,184,255,.15); color:var(--note-clr); border:1px solid rgba(91,184,255,.35); }
+    .no-rules  { font-size:13px; font-style:italic; color:var(--muted); }
+
+    .notes-ta {
+      width:100%; background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:12px 14px; color:var(--text);
+      font-family:'Barlow',sans-serif; font-size:14px; line-height:1.6;
+      resize:vertical; outline:none; min-height:90px; transition:border-color .2s;
+    }
+    .notes-ta:focus { border-color: var(--accent); }
+    .notes-ta::placeholder { color: var(--muted); }
+    .save-status { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); margin-top:5px; opacity:0; transition:opacity .3s; min-height:14px; }
+    .save-status.show { opacity: 1; }
+    .spacer { height: 18px; }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    .ftr {
+      position:fixed; inset:auto 0 0 0; height:var(--ftr);
+      background:var(--bg); border-top:1px solid var(--border);
+      display:flex; align-items:center; padding:0 10px; gap:8px; z-index:50;
+    }
+    .nav-btn {
+      width:52px; height:52px; flex-shrink:0; background:var(--surface);
+      border:1px solid var(--border); border-radius:12px; color:var(--text);
+      font-size:20px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:background .15s, border-color .15s; touch-action:manipulation;
+    }
+    .nav-btn:active   { background:var(--surface2); border-color:var(--accent); }
+    .nav-btn:disabled { opacity:.28; pointer-events:none; }
+    .dots { flex:1; display:flex; align-items:center; gap:5px; overflow-x:auto; justify-content:center; scrollbar-width:none; padding:4px 0; }
+    .dots::-webkit-scrollbar { display:none; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--border); flex-shrink:0; cursor:pointer; transition:background .2s, transform .2s; }
+    .dot.active { background:var(--accent); transform:scale(1.5); }
+    .dot.p4 { border-radius:3px; }
+    .dot.p5 { border-radius:2px; width:9px; }
+
+    /* ── OVERVIEW ────────────────────────────────── */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:200; overflow-y:auto; }
+    .overlay.open { display:block; }
+    .ov-sheet { background:var(--bg); margin:16px 10px; border-radius:18px; border:1px solid var(--border); overflow:hidden; }
+    .ov-hdr   { padding:16px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .ov-title { font-family:'Bebas Neue',cursive; font-size:22px; letter-spacing:2px; }
+    .ov-par   { font-size:12px; color:var(--muted); font-weight:600; letter-spacing:1px; }
+    .ov-close { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:4px 6px; line-height:1; }
+    .ov-grid  { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); }
+    .ov-cell  { background:var(--surface); padding:12px 6px; text-align:center; cursor:pointer; transition:background .15s; }
+    .ov-cell:active, .ov-cell.cur { background:var(--accent-dim); }
+    .ov-n    { font-family:'Bebas Neue',cursive; font-size:26px; line-height:1; }
+    .ov-n.p3 { color:var(--accent); }
+    .ov-n.p4 { color:var(--par4-clr); }
+    .ov-n.p5 { color:var(--par5-clr); }
+    .ov-inf  { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    .ov-section  { padding:16px 18px; border-top:1px solid var(--border); }
+    .gen-box { background:var(--surface); border-radius:10px; padding:14px 16px; font-size:13px; line-height:1.65; color:var(--text); }
+    .ov-settings { padding:14px 18px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .ov-user { font-size:13px; color:var(--muted); }
+    .ov-user strong { color:var(--accent); }
+    .switch-btn { background:none; border:1px solid var(--border); border-radius:8px; padding:6px 12px; color:var(--muted); font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+    .switch-btn:active { border-color:var(--accent); color:var(--accent); }
+    .ov-bottom { height:20px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-icon">🥏</div>
+    <div class="login-title">Caddy Book</div>
+    <div class="login-sub">Enter your name to save and sync<br>your notes across any device</div>
+    <input type="text" class="login-input" id="nameInput"
+      placeholder="your name" maxlength="20"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      onkeydown="if(event.key==='Enter')handleLogin()">
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">Load My Notes</button>
+    <div class="login-status" id="loginStatus"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <button class="wind-badge" id="windBadge" onclick="fetchWind()" title="Tap to refresh">
+    <span class="wind-arrow" id="windArrow">↑</span>
+    <span class="wind-spd"   id="windSpd">--</span>
+    <span class="wind-dir"   id="windDir">mph</span>
+  </button>
+  <div class="hdr-center">
+    <div class="hdr-title"><span>21st Open at Tallahassee</span></div>
+    <div class="layout-toggle">
+      <button class="lt-btn active" id="ltShort" onclick="switchLayout('short')">Short</button>
+      <button class="lt-btn"        id="ltBack"  onclick="switchLayout('back')">Back</button>
+    </div>
+  </div>
+  <button class="all-btn" onclick="openOverview()">All Holes</button>
+</header>
+
+<!-- MAIN -->
+<div class="main" id="main"></div>
+
+<!-- FOOTER -->
+<footer class="ftr">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">←</button>
+  <div class="dots" id="dots"></div>
+  <button class="nav-btn" id="nextBtn" onclick="navigate(1)">→</button>
+</footer>
+
+<!-- OVERVIEW -->
+<div class="overlay" id="overlay" onclick="bgClose(event)">
+  <div class="ov-sheet">
+    <div class="ov-hdr">
+      <div><div class="ov-title" id="ovTitle">All 24 Holes</div><div class="ov-par" id="ovPar"></div></div>
+      <button class="ov-close" onclick="closeOverview()">✕</button>
+    </div>
+    <div class="ov-grid" id="ovGrid"></div>
+    <div class="ov-section">
+      <div class="sec-label" style="margin-bottom:10px">General Course Rules</div>
+      <div class="gen-box">
+        <strong style="color:var(--ob)">OB:</strong> All roads, water bodies, bridges, pavilions, racquetball/tennis courts, sidewalks, and painted/string lines (unless noted otherwise). White stakes/flags are <em>not</em> OB.<br><br>
+        <strong style="color:var(--note-clr)">Yellow cables</strong> are not OB — take 1 meter relief inside/perpendicular to cable.<br><br>
+        Relief from unmarked casual water per <strong>PDGA Rule 806.03</strong>.
+      </div>
+    </div>
+    <div class="ov-settings">
+      <div class="ov-user">Signed in as <strong id="userDisplay">—</strong></div>
+      <button class="switch-btn" onclick="switchUser()">Switch User</button>
+    </div>
+    <div class="ov-bottom"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════
+const JKEY            = '$2a$10$EqoMzoI80VTKjO55/38SButfIYpJkzEc6DdysQkg23L9pqqWTob4y';
+const REGISTRY_BIN_ID = ''; // ← paste registry ID here after first run
+
+// ═══════════════════════════════════════════════════
+//  HOLE DATA
+// ═══════════════════════════════════════════════════
+const SHORT_HOLES = [
+  {id:'1', par:3,feet:250,img:'images/IMG_6985.png',rules:[{t:'ob',s:'Walking path and beyond behind basket; fence on left of fairway and beyond.'}]},
+  {id:'2', par:3,feet:300,img:'images/IMG_6986.png',rules:[{t:'ob',s:'Road on the right and beyond. Fencing around parking spots and beyond.'}]},
+  {id:'3', par:3,feet:195,img:'images/IMG_6987.png',rules:[{t:'ob',s:'Pavilion on right.'}]},
+  {id:'4', par:3,feet:190,img:'images/IMG_6988.png',rules:[{t:'ob',s:'Road on right and beyond.'}]},
+  {id:'5', par:3,feet:280,img:'images/IMG_6989.png',rules:[{t:'ob',s:'Walking path and beyond on left. Road and beyond on right. Fencing around parking spots and beyond.'}]},
+  {id:'6', par:3,feet:175,img:'images/IMG_6990.png',rules:[{t:'ob',s:'Road on right and beyond.'},{t:'mando',s:'Must pass right of marked tree. If missed, move to DZ +1 penalty stroke.'}]},
+  {id:'7', par:3,feet:205,img:'images/IMG_6991.png',rules:[{t:'ob',s:'Road long of basket and beyond.'}]},
+  {id:'8', par:3,feet:270,img:'images/IMG_6992.png',rules:[{t:'ob',s:'String/Paint flagged line along right side of fairway and behind basket and beyond.'}]},
+  {id:'9', par:4,feet:410,img:'images/IMG_6993.png',rules:[{t:'ob',s:'Creek (surrounded by water), bridges, road (and beyond); white painted/string lines left/right (and beyond), rock ditch before green, and behind basket (and beyond).'},{t:'note',s:'After any tee shot coming to rest OB, the player may choose to proceed to the DZ +1 penalty throw.'}]},
+  {id:'A', par:4,feet:465,img:'images/IMG_6994.png',rules:[{t:'ob',s:'String/Painted flagged line left and along creek.'}]},
+  {id:'B', par:4,feet:305,img:'images/IMG_6995.png',rules:[{t:'ob',s:'Road and sidewalk and beyond past basket.'}]},
+  {id:'C', par:4,feet:380,img:'images/IMG_6996.png',rules:[{t:'ob',s:'Surrounded by water. Paved road past basket and beyond.'},{t:'note',s:'Ditch area to the right of pin — if inside this area, move to DZ +1 penalty throw.'}]},
+  {id:'D', par:3,feet:255,img:'images/IMG_6997.png',rules:[{t:'ob',s:'Road in front of pad and left and beyond.'},{t:'mando',s:'Must pass left of marked tree. If missed, move to DZ +1 penalty throw.'}]},
+  {id:'E', par:4,feet:415,img:'images/IMG_6998.png',rules:[{t:'ob',s:'Road on left and beyond. Paved road on right of basket and beyond.'}]},
+  {id:'F', par:3,feet:300,img:'images/IMG_6999.png',rules:[{t:'ob',s:'Road on left and beyond.'}]},
+  {id:'10',par:4,feet:550,img:'images/IMG_7001.png',rules:[{t:'ob',s:'Racquetball, tennis courts, sidewalk (and beyond), and road on right (and beyond).'}]},
+  {id:'11',par:3,feet:240,img:'images/IMG_7002.png',rules:[{t:'ob',s:'Road right and beyond.'}]},
+  {id:'12',par:3,feet:215,img:'images/IMG_7003.png',rules:[]},
+  {id:'13',par:3,feet:285,img:'images/IMG_7004.png',rules:[{t:'ob',s:'Road right and beyond. Road long of basket and beyond.'}]},
+  {id:'14',par:3,feet:260,img:'images/IMG_7005.png',rules:[{t:'ob',s:'Racquetball, tennis courts, sidewalk (and beyond), and road on left (and beyond).'}]},
+  {id:'15',par:3,feet:245,img:'images/IMG_7006.png',rules:[{t:'ob',s:'Road left and beyond.'}]},
+  {id:'16',par:3,feet:275,img:'images/IMG_7007.png',rules:[]},
+  {id:'17',par:3,feet:260,img:'images/IMG_7008.png',rules:[{t:'ob',s:'Road right and beyond.'}]},
+  {id:'18',par:5,feet:665,img:'images/IMG_7009.png',rules:[{t:'ob',s:'String/Painted flagged line along entire left side of fairway and behind basket and beyond.'}]},
+];
+
+const BACK_HOLES = [
+  {id:'1', par:3,feet:325,img:'images/IMG_7013.png',rules:[{t:'ob',s:'Walking path and beyond behind basket; fence on left of fairway and beyond.'},{t:'mando',s:'Must pass left of tree. If missed, move to DZ +1 penalty stroke.'}]},
+  {id:'2', par:3,feet:335,img:'images/IMG_7014.png',rules:[{t:'ob',s:'Road on the right and beyond. Fencing around parking spots and beyond.'}]},
+  {id:'3', par:3,feet:245,img:'images/IMG_7015.png',rules:[{t:'ob',s:'Pavilion on right.'}]},
+  {id:'4', par:4,feet:325,img:'images/IMG_7016.png',rules:[{t:'ob',s:'Road on right and beyond.'}]},
+  {id:'5', par:3,feet:360,img:'images/IMG_7017.png',rules:[{t:'ob',s:'Walking path and beyond on left. Road and beyond on right. Fencing around parking spots and beyond.'}]},
+  {id:'6', par:3,feet:220,img:'images/IMG_7018.png',rules:[{t:'ob',s:'Road on right and beyond.'},{t:'mando',s:'Must pass right of marked tree. If missed, move to DZ +1 penalty stroke.'}]},
+  {id:'7', par:3,feet:270,img:'images/IMG_7019.png',rules:[{t:'ob',s:'Road long of basket and beyond.'}]},
+  {id:'8', par:3,feet:450,img:'images/IMG_7020.png',rules:[{t:'ob',s:'String/Paint flagged line along right side of fairway and behind basket and beyond.'},{t:'mando',s:'Must pass left of marked tree. If missed, proceed to Short pad +1 penalty stroke.'}]},
+  {id:'9', par:4,feet:550,img:'images/IMG_7021.png',rules:[{t:'ob',s:'Creek (surrounded by water), bridges, road (and beyond); white painted/string lines left/right (and beyond), rock ditch before green.'},{t:'note',s:'After any tee shot coming to rest OB, player may choose to proceed to Short pad +1 penalty throw.'}]},
+  {id:'A', par:4,feet:555,img:'images/IMG_7022.png',rules:[{t:'ob',s:'String/Painted flagged line left and along creek.'}]},
+  {id:'B', par:4,feet:430,img:'images/IMG_7023.png',rules:[{t:'ob',s:'Road and sidewalk and beyond past basket.'}]},
+  {id:'C', par:4,feet:530,img:'images/IMG_7024.png',rules:[{t:'ob',s:'Surrounded by water. Paved road past basket and beyond.'},{t:'note',s:'Ditch area to the right of pin — if inside this area, move to DZ +1 penalty throw.'}]},
+  {id:'D', par:3,feet:330,img:'images/IMG_7025.png',rules:[{t:'ob',s:'Road in front of pad and left and beyond.'},{t:'mando',s:'MANDO 1: Must pass right of marked tree. If missed, move to Short pad +1 penalty throw.'},{t:'mando',s:'MANDO 2: Must pass left of marked tree. If missed, move to DZ +1 penalty throw.'}]},
+  {id:'E', par:4,feet:480,img:'images/IMG_7026.png',rules:[{t:'ob',s:'Road on left and beyond. Paved road on right of basket and beyond.'}]},
+  {id:'F', par:3,feet:415,img:'images/IMG_7027.png',rules:[{t:'ob',s:'Road on left and beyond.'}]},
+  {id:'10',par:4,feet:630,img:'images/IMG_7028.png',rules:[{t:'ob',s:'Racquetball, tennis courts, sidewalk (and beyond), and road on right (and beyond). Back pad is an island — all area before and including the road is OB.'},{t:'note',s:'If disc never crossed in-bounds, proceed to Short pad +1 penalty throw.'}]},
+  {id:'11',par:3,feet:315,img:'images/IMG_7029.png',rules:[{t:'ob',s:'Road right and beyond.'}]},
+  {id:'12',par:3,feet:315,img:'images/IMG_7030.png',rules:[{t:'mando',s:'Must pass left of marked tree. If missed, move to Short pad +1 penalty throw.'}]},
+  {id:'13',par:3,feet:330,img:'images/IMG_7031.png',rules:[{t:'ob',s:'Road right and beyond. Road long of basket and beyond.'}]},
+  {id:'14',par:3,feet:325,img:'images/IMG_7032.png',rules:[{t:'ob',s:'Racquetball, tennis courts, sidewalk (and beyond), and road in front of pad. Back pad is an island — all area before and including the road is OB.'},{t:'note',s:'If disc never crossed in-bounds, proceed to Short pad +1 penalty throw.'}]},
+  {id:'15',par:3,feet:345,img:'images/IMG_7033.png',rules:[{t:'ob',s:'Road left and beyond.'}]},
+  {id:'16',par:3,feet:345,img:'images/IMG_7034.png',rules:[{t:'mando',s:'Must pass left of marked tree. If missed, move to Short pad +1 penalty throw.'}]},
+  {id:'17',par:3,feet:335,img:'images/IMG_7035.png',rules:[{t:'ob',s:'Road right and beyond.'}]},
+  {id:'18',par:4,feet:805,img:'images/IMG_7036.png',rules:[{t:'ob',s:'String/Painted flagged line along entire left side of fairway and behind basket and beyond.'}]},
+];
+
+const LAYOUTS = {
+  short: { name:'Short Tees', key:'short', holes: SHORT_HOLES },
+  back:  { name:'Back Pad',   key:'back',  holes: BACK_HOLES  },
+};
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let activeLayout = lsg('dgc_layout') || 'short';
+let regId  = REGISTRY_BIN_ID || lsg('dgc_registry');
+let uname  = lsg('dgc_username');
+let binId  = lsg('dgc_bin');
+let notes  = { short:{}, back:{} };
+let cur    = 0;
+
+function holes() { return LAYOUTS[activeLayout].holes; }
+function lsg(k)  { return localStorage.getItem(k); }
+function lss(k,v){ localStorage.setItem(k,v); }
+function lsr(k)  { localStorage.removeItem(k); }
+
+// ═══════════════════════════════════════════════════
+//  JSONBIN
+// ═══════════════════════════════════════════════════
+const JB = 'https://api.jsonbin.io/v3/b';
+const JH = {'Content-Type':'application/json','X-Master-Key':JKEY};
+
+async function jbCreate(name,data){ const r=await fetch(JB,{method:'POST',headers:{...JH,'X-Bin-Name':name,'X-Bin-Private':'true'},body:JSON.stringify(data)}); if(!r.ok)throw new Error('create'); return(await r.json()).metadata.id; }
+async function jbRead(id)         { const r=await fetch(`${JB}/${id}/latest`,{headers:JH}); if(!r.ok)throw new Error('read'); return(await r.json()).record; }
+async function jbUpdate(id,data)  { const r=await fetch(`${JB}/${id}`,{method:'PUT',headers:JH,body:JSON.stringify(data)}); if(!r.ok)throw new Error('update'); }
+
+// ═══════════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════════
+async function handleLogin() {
+  const inp  = document.getElementById('nameInput');
+  const btn  = document.getElementById('loginBtn');
+  const name = inp.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+  if (!name) { inp.focus(); return; }
+  btn.disabled = true;
+  setLS('Connecting…');
+  try {
+    if (!regId) {
+      setLS('First-time setup…');
+      regId = await jbCreate('dgc-registry',{});
+      lss('dgc_registry', regId);
+      if (!lsg('dgc_reg_noted')) {
+        lss('dgc_reg_noted','1');
+        setTimeout(()=>alert('One-time setup:\n\nRegistry ID:\n'+regId+'\n\nPaste this into REGISTRY_BIN_ID in your index.html and redeploy.'),500);
+      }
+    }
+    const registry = await jbRead(regId);
+    if (registry[name]) {
+      binId = registry[name];
+      lss('dgc_bin', binId);
+      setLS('Welcome back, '+name+'! Loading notes…');
+      const cloud = await jbRead(binId);
+      notes = normalizeNotes(cloud);
+      cacheNotesLocally();
+    } else {
+      setLS('Setting up your notes…');
+      binId = await jbCreate('dgc-notes-'+name, {short:{},back:{}});
+      lss('dgc_bin', binId);
+      registry[name] = binId;
+      await jbUpdate(regId, registry);
+      notes = {short:{},back:{}};
+    }
+    uname = name;
+    lss('dgc_username', name);
+    closeLogin();
+    document.getElementById('userDisplay').textContent = uname;
+    build();
+    fetchWind();
+  } catch(e) {
+    setLS('Connection failed — check internet and try again.', true);
+    btn.disabled = false;
+  }
+}
+
+function normalizeNotes(cloud) {
+  if (!cloud) return {short:{},back:{}};
+  if (cloud.short!==undefined || cloud.back!==undefined) return {short:cloud.short||{},back:cloud.back||{}};
+  return {short:{},back:{}};
+}
+
+function cacheNotesLocally() {
+  Object.entries(notes.short||{}).forEach(([k,v])=>lss('dgc_note_short_'+k,v));
+  Object.entries(notes.back||{}) .forEach(([k,v])=>lss('dgc_note_back_'+k,v));
+}
+
+function setLS(msg,err=false) { const el=document.getElementById('loginStatus'); el.textContent=msg; el.className='login-status'+(err?' err':''); }
+function closeLogin() { document.getElementById('loginWrap').classList.remove('show'); }
+function showLogin()  { document.getElementById('loginWrap').classList.add('show'); setTimeout(()=>document.getElementById('nameInput').focus(),100); }
+
+function switchUser() {
+  closeOverview();
+  lsr('dgc_username'); lsr('dgc_bin');
+  uname=null; binId=null; notes={short:{},back:{}};
+  document.getElementById('main').innerHTML='';
+  document.getElementById('dots').innerHTML='';
+  document.getElementById('ovGrid').innerHTML='';
+  document.getElementById('nameInput').value='';
+  cur=0;
+  showLogin();
+}
+
+// ═══════════════════════════════════════════════════
+//  LAYOUT TOGGLE
+// ═══════════════════════════════════════════════════
+function switchLayout(layout) {
+  if (layout === activeLayout) return;
+  activeLayout = layout;
+  lss('dgc_layout', layout);
+  document.getElementById('ltShort').classList.toggle('active', layout==='short');
+  document.getElementById('ltBack') .classList.toggle('active', layout==='back');
+  // Rebuild cards for new layout
+  document.getElementById('main').innerHTML='';
+  document.getElementById('dots').innerHTML='';
+  document.getElementById('ovGrid').innerHTML='';
+  cur = 0;
+  build();
+}
+
+// ═══════════════════════════════════════════════════
+//  NOTES
+// ═══════════════════════════════════════════════════
+function getNote(id) {
+  return notes[activeLayout]?.[id] ?? lsg('dgc_note_'+activeLayout+'_'+id) ?? '';
+}
+
+let saveTimer;
+function queueSave(id, val) {
+  if (!notes[activeLayout]) notes[activeLayout]={};
+  notes[activeLayout][id] = val;
+  lss('dgc_note_'+activeLayout+'_'+id, val);
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    if (!binId) return;
+    try { await jbUpdate(binId, notes); flashSave('✓ Synced'); }
+    catch { flashSave('📱 Saved locally'); }
+  }, 1400);
+}
+
+function flashSave(msg) {
+  const el = document.querySelector('.card.active .save-status');
+  if (!el) return;
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════════════
+//  WIND
+// ═══════════════════════════════════════════════════
+function degToCompass(d) {
+  return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16];
+}
+async function fetchWind() {
+  if (!navigator.geolocation) return;
+  const badge = document.getElementById('windBadge');
+  badge.classList.add('loading');
+  navigator.geolocation.getCurrentPosition(
+    async ({coords:{latitude:lat,longitude:lon}}) => {
+      try {
+        const d = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=mph&timezone=auto`)).json();
+        document.getElementById('windSpd').textContent = Math.round(d.current.wind_speed_10m);
+        document.getElementById('windDir').textContent = degToCompass(d.current.wind_direction_10m);
+        document.getElementById('windArrow').style.transform = `rotate(${(d.current.wind_direction_10m+180)%360}deg)`;
+      } catch(e) { /* silent */ }
+      badge.classList.remove('loading');
+    },
+    () => badge.classList.remove('loading')
+  );
+}
+
+// ═══════════════════════════════════════════════════
+//  BUILD
+// ═══════════════════════════════════════════════════
+const TAG = {ob:['OB','tag-ob'],mando:['MANDO','tag-mando'],note:['NOTE','tag-note']};
+
+function build() {
+  const main=document.getElementById('main');
+  const dotsEl=document.getElementById('dots');
+  const grid=document.getElementById('ovGrid');
+  const layoutHoles = holes();
+  const totalPar = layoutHoles.reduce((s,h)=>s+h.par,0);
+
+  document.getElementById('ovTitle').textContent = `${LAYOUTS[activeLayout].name} — All 24 Holes`;
+  document.getElementById('ovPar').textContent   = `Course Par ${totalPar}`;
+  document.getElementById('userDisplay').textContent = uname||'—';
+
+  // Sync toggle button state
+  document.getElementById('ltShort').classList.toggle('active', activeLayout==='short');
+  document.getElementById('ltBack') .classList.toggle('active', activeLayout==='back');
+
+  layoutHoles.forEach((h,i) => {
+    // Card
+    const card = document.createElement('div');
+    card.className = `card par${h.par}${i===0?' active':''}`;
+    card.id = 'card-'+i;
+
+    const rulesHtml = h.rules.length
+      ? h.rules.map(r=>{const[lbl,cls]=TAG[r.t];return`<div class="rule ${r.t}"><span class="rule-tag ${cls}">${lbl}</span><span>${r.s}</span></div>`;}).join('')
+      : '<p class="no-rules">No specific local rules for this hole.</p>';
+
+    const imgHtml = h.img
+      ? `<img class="map-img" src="${h.img}" alt="Hole ${h.id}" onerror="this.outerHTML='<div class=\\'map-missing\\'><span>🗺</span>Image not found</div>'">`
+      : `<div class="map-missing"><span>📸</span>Map coming soon</div>`;
+
+    card.innerHTML = `
+      <div class="hero">
+        <div class="hero-num">${h.id}</div>
+        <div class="hero-meta">
+          <div class="hero-sub">Tom Brown Park · ${LAYOUTS[activeLayout].name}</div>
+          <div class="hero-stats">
+            <div class="stat"><div class="stat-val par-val">${h.par}</div><div class="stat-lbl">Par</div></div>
+            <div class="divider"></div>
+            <div class="stat"><div class="stat-val">${h.feet}</div><div class="stat-lbl">Feet</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="map-wrap">${imgHtml}</div>
+      <div class="section"><div class="sec-label">Course Rules</div>${rulesHtml}</div>
+      <div class="section">
+        <div class="sec-label">My Notes</div>
+        <textarea class="notes-ta" id="ta-${h.id}" placeholder="Disc, line, elevation, wind effect…">${getNote(h.id)}</textarea>
+        <div class="save-status"></div>
+      </div>
+      <div class="spacer"></div>`;
+    main.appendChild(card);
+    card.querySelector('.notes-ta').addEventListener('input', e=>queueSave(h.id, e.target.value));
+
+    // Dot
+    const dot=document.createElement('div');
+    dot.className=`dot p${h.par}${i===0?' active':''}`;
+    dot.id='dot-'+i; dot.onclick=()=>go(i);
+    dotsEl.appendChild(dot);
+
+    // Overview cell
+    const cell=document.createElement('div');
+    cell.className=`ov-cell${i===0?' cur':''}`;cell.id='ovc-'+i;
+    cell.innerHTML=`<div class="ov-n p${h.par}">${h.id}</div><div class="ov-inf">Par ${h.par} · ${h.feet}ft</div>`;
+    cell.onclick=()=>{go(i);closeOverview();};
+    grid.appendChild(cell);
+  });
+
+  refreshNav();
+}
+
+// ═══════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════
+function go(idx) {
+  ['card-','dot-','ovc-'].forEach(p=>{
+    document.getElementById(p+cur)?.classList.remove(p==='ovc-'?'cur':'active');
+    document.getElementById(p+idx)?.classList.add(p==='ovc-'?'cur':'active');
+  });
+  cur=idx;
+  document.getElementById('dot-'+cur)?.scrollIntoView({inline:'center',behavior:'smooth'});
+  document.getElementById('main').scrollTop=0;
+  refreshNav();
+}
+function navigate(dir){const n=cur+dir;if(n>=0&&n<holes().length)go(n);}
+function refreshNav(){
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').disabled=cur===holes().length-1;
+}
+
+// ═══════════════════════════════════════════════════
+//  OVERVIEW
+// ═══════════════════════════════════════════════════
+function openOverview()  {document.getElementById('overlay').classList.add('open');}
+function closeOverview() {document.getElementById('overlay').classList.remove('open');}
+function bgClose(e)      {if(e.target===document.getElementById('overlay'))closeOverview();}
+
+// ═══════════════════════════════════════════════════
+//  SWIPE + KEYBOARD
+// ═══════════════════════════════════════════════════
+let sx=0,sy=0;
+document.getElementById('main').addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+document.getElementById('main').addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.6)navigate(dx<0?1:-1);
+},{passive:true});
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);
+  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  navigate(-1);
+});
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+if (uname && binId) {
+  // Load from local cache immediately
+  ['short','back'].forEach(layout=>{
+    LAYOUTS[layout].holes.forEach(h=>{
+      const c=lsg('dgc_note_'+layout+'_'+h.id);
+      if(c){if(!notes[layout])notes[layout]={};notes[layout][h.id]=c;}
+    });
+  });
+  build();
+  fetchWind();
+  // Background cloud sync
+  jbRead(binId).then(cloud=>{
+    if(!cloud) return;
+    notes = normalizeNotes(cloud);
+    // Refresh current layout's textareas
+    holes().forEach(h=>{
+      const cloudNote = notes[activeLayout]?.[h.id];
+      if(cloudNote!==undefined){
+        const ta=document.getElementById('ta-'+h.id);
+        if(ta&&ta.value!==cloudNote) ta.value=cloudNote;
+        lss('dgc_note_'+activeLayout+'_'+h.id, cloudNote);
+      }
+    });
+  }).catch(()=>{});
+} else {
+  showLogin();
+}
+</script>
+</body>
+</html>
