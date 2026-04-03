@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
     :root {
       --bg:         #0b1a0b;
@@ -30,14 +30,7 @@
       --ftr: 76px;
     }
 
-    html, body {
-      height: 100%; width: 100%;
-      overflow: hidden;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Barlow', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
+    html,body { height:100%; width:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; -webkit-tap-highlight-color:transparent; }
 
     /* LOGIN */
     .login-wrap { display:none; position:fixed; inset:0; background:var(--bg); z-index:400; align-items:center; justify-content:center; padding:24px; }
@@ -59,18 +52,15 @@
     .hdr-center { display:flex; flex-direction:column; align-items:center; gap:4px; }
     .hdr-title  { font-family:'Bebas Neue',cursive; font-size:14px; letter-spacing:2.5px; color:var(--muted); text-align:center; line-height:1; }
     .hdr-title span { color:var(--accent); }
-
     .layout-toggle { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px; }
     .lt-btn { background:none; border:none; color:var(--muted); font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:3px 12px; border-radius:16px; cursor:pointer; transition:background .15s,color .15s; touch-action:manipulation; }
     .lt-btn.active { background:var(--accent); color:var(--bg); }
-
     .wind-badge { position:absolute; left:14px; display:flex; align-items:center; gap:4px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:5px 10px 5px 8px; cursor:pointer; transition:border-color .2s,opacity .3s; touch-action:manipulation; }
-    .wind-badge:active  { border-color:var(--accent); }
+    .wind-badge:active { border-color:var(--accent); }
     .wind-badge.loading { opacity:.4; }
     .wind-arrow { font-size:13px; display:inline-block; color:var(--accent); transition:transform .6s ease; }
     .wind-spd   { font-family:'Bebas Neue',cursive; font-size:15px; color:var(--text); line-height:1; }
     .wind-dir   { font-size:10px; font-weight:700; letter-spacing:.5px; color:var(--muted); }
-
     .all-btn { position:absolute; right:14px; background:none; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:6px 11px; cursor:pointer; transition:border-color .2s,color .2s; }
     .all-btn:hover { border-color:var(--accent); color:var(--accent); }
 
@@ -80,7 +70,6 @@
     /* CARDS */
     .card { display:none; flex-direction:column; min-height:100%; }
     .card.active { display:flex; }
-
     .hero { background:var(--surface); padding:16px 20px 14px; display:flex; align-items:center; gap:18px; border-bottom:2px solid var(--border); }
     .hero-num  { font-family:'Bebas Neue',cursive; font-size:88px; line-height:.85; color:var(--accent); min-width:72px; text-align:center; }
     .hero-meta { display:flex; flex-direction:column; gap:5px; }
@@ -90,19 +79,15 @@
     .stat-val { font-family:'Bebas Neue',cursive; font-size:36px; line-height:1; }
     .stat-lbl { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
     .divider  { width:1px; height:40px; background:var(--border); }
-
     .par3 .par-val { color:var(--accent); }
     .par4 .par-val { color:var(--par4-clr); }
     .par5 .par-val { color:var(--par5-clr); }
-
     .map-wrap    { background:#050d05; border-bottom:1px solid var(--border); text-align:center; }
     .map-img     { width:100%; display:block; max-height:56vh; object-fit:contain; }
     .map-missing { padding:55px 20px; color:var(--muted); font-size:12px; letter-spacing:1px; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; }
     .map-missing span { font-size:28px; display:block; margin-bottom:8px; }
-
     .section   { padding:16px 18px; border-bottom:1px solid var(--border); }
     .sec-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
-
     .rule { display:flex; gap:10px; padding:10px 12px; background:var(--surface); border-radius:8px; margin-bottom:7px; border-left:3px solid transparent; font-size:14px; line-height:1.55; }
     .rule:last-child { margin-bottom:0; }
     .rule.ob    { border-left-color:var(--ob); }
@@ -113,7 +98,6 @@
     .tag-mando { background:rgba(255,217,61,.15); color:var(--mando);    border:1px solid rgba(255,217,61,.35); }
     .tag-note  { background:rgba(91,184,255,.15); color:var(--note-clr); border:1px solid rgba(91,184,255,.35); }
     .no-rules  { font-size:13px; font-style:italic; color:var(--muted); }
-
     .notes-ta { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-family:'Barlow',sans-serif; font-size:14px; line-height:1.6; resize:vertical; outline:none; min-height:90px; transition:border-color .2s; }
     .notes-ta:focus { border-color:var(--accent); }
     .notes-ta::placeholder { color:var(--muted); }
@@ -121,7 +105,58 @@
     .save-status.show { opacity:1; }
     .spacer { height:18px; }
 
-    /* FOOTER */
+    /* ── DISC SELECTION ─────────────────────────── */
+    .disc-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .disc-chip  {
+      display:flex; align-items:center; gap:5px;
+      padding:4px 8px 4px 10px; border-radius:20px;
+      background:var(--surface); border:1px solid var(--border);
+      font-size:12px; font-weight:600;
+    }
+    .disc-chip.td { border-color:var(--ob);       color:var(--ob); }
+    .disc-chip.tf { border-color:var(--mando);     color:var(--mando); }
+    .disc-chip.tm { border-color:var(--note-clr);  color:var(--note-clr); }
+    .disc-chip.tp { border-color:var(--accent);    color:var(--accent); }
+    .chip-x { background:none; border:none; color:inherit; cursor:pointer; font-size:15px; line-height:1; padding:0 0 0 2px; opacity:.7; }
+    .tag-disc-btn {
+      width:100%; background:none; border:1px dashed var(--border);
+      border-radius:8px; padding:8px 14px; color:var(--muted);
+      font-family:'Barlow',sans-serif; font-size:12px; font-weight:600;
+      cursor:pointer; transition:border-color .2s,color .2s; margin-top:2px;
+    }
+    .tag-disc-btn:active { border-color:var(--accent); color:var(--accent); }
+    .no-bag-hint { font-size:12px; color:var(--muted); font-style:italic; cursor:pointer; }
+    .no-bag-hint:active { color:var(--accent); }
+    .no-chips-msg { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:10px; }
+
+    /* ── DISC PICKER ────────────────────────────── */
+    .picker-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:300; }
+    .picker-overlay.open { display:block; }
+    .picker-sheet { position:absolute; bottom:0; left:0; right:0; background:var(--bg); border-radius:18px 18px 0 0; border:1px solid var(--border); border-bottom:none; max-height:82vh; display:flex; flex-direction:column; }
+    .picker-hdr { padding:16px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+    .picker-title { font-family:'Bebas Neue',cursive; font-size:22px; letter-spacing:2px; }
+    .picker-sub   { font-size:12px; color:var(--muted); margin-top:1px; }
+    .picker-close { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:4px 6px; line-height:1; }
+    .picker-body  { overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
+    .disc-group-hdr { padding:12px 18px 6px; font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; background:var(--bg); position:sticky; top:0; }
+    .disc-group-hdr.gd { color:var(--ob); }
+    .disc-group-hdr.gf { color:var(--mando); }
+    .disc-group-hdr.gm { color:var(--note-clr); }
+    .disc-group-hdr.gp { color:var(--accent); }
+    .disc-item { display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .15s; }
+    .disc-item:active,.disc-item.sel { background:var(--surface2); }
+    .disc-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .disc-dot.dd { background:var(--ob); }
+    .disc-dot.df { background:var(--mando); }
+    .disc-dot.dm { background:var(--note-clr); }
+    .disc-dot.dp { background:var(--accent); }
+    .disc-info  { flex:1; min-width:0; }
+    .disc-iname { font-size:15px; font-weight:600; color:var(--text); }
+    .disc-imeta { font-size:11px; color:var(--muted); margin-top:2px; }
+    .disc-inote { font-size:11px; color:var(--muted); font-style:italic; margin-top:1px; }
+    .disc-check { font-size:18px; color:var(--accent); width:22px; text-align:center; flex-shrink:0; }
+
+    /* ── FOOTER ─────────────────────────────────── */
     .ftr { position:fixed; inset:auto 0 0 0; height:var(--ftr); background:var(--bg); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 10px; gap:8px; z-index:50; }
     .nav-btn { width:52px; height:52px; flex-shrink:0; background:var(--surface); border:1px solid var(--border); border-radius:12px; color:var(--text); font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s,border-color .15s; touch-action:manipulation; }
     .nav-btn:active   { background:var(--surface2); border-color:var(--accent); }
@@ -133,7 +168,7 @@
     .dot.p4 { border-radius:3px; }
     .dot.p5 { border-radius:2px; width:9px; }
 
-    /* OVERVIEW */
+    /* ── OVERVIEW ────────────────────────────────── */
     .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:200; overflow-y:auto; }
     .overlay.open { display:block; }
     .ov-sheet { background:var(--bg); margin:16px 10px; border-radius:18px; border:1px solid var(--border); overflow:hidden; }
@@ -156,6 +191,24 @@
     .ov-user strong { color:var(--accent); }
     .switch-btn { background:none; border:1px solid var(--border); border-radius:8px; padding:6px 12px; color:var(--muted); font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
     .switch-btn:active { border-color:var(--accent); color:var(--accent); }
+
+    /* Bag section in overview */
+    .bag-counts { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .bag-pill { font-size:11px; font-weight:700; letter-spacing:.5px; padding:3px 10px; border-radius:12px; border:1px solid; }
+    .bag-pill.gd { color:var(--ob);      border-color:var(--ob);      background:rgba(255,123,58,.1); }
+    .bag-pill.gf { color:var(--mando);   border-color:var(--mando);   background:rgba(255,217,61,.1); }
+    .bag-pill.gm { color:var(--note-clr);border-color:var(--note-clr);background:rgba(91,184,255,.1); }
+    .bag-pill.gp { color:var(--accent);  border-color:var(--accent);  background:rgba(168,255,46,.1); }
+    .upload-csv-label {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:8px; padding:8px 14px;
+      color:var(--text); font-family:'Barlow',sans-serif;
+      font-size:12px; font-weight:600; cursor:pointer;
+      transition:border-color .2s;
+    }
+    .upload-csv-label:hover { border-color:var(--accent); }
+    .upload-csv-input { display:none; }
     .ov-bottom { height:20px; }
   </style>
 </head>
@@ -219,6 +272,15 @@
         Relief from unmarked casual water per <strong>PDGA Rule 806.03</strong>.
       </div>
     </div>
+    <!-- MY BAG -->
+    <div class="ov-section">
+      <div class="sec-label" style="margin-bottom:10px">My Bag</div>
+      <div id="bagDisplay"></div>
+      <label class="upload-csv-label">
+        📂 Upload DiscMate CSV
+        <input type="file" class="upload-csv-input" accept=".csv" onchange="handleBagUpload(event)">
+      </label>
+    </div>
     <div class="ov-settings">
       <div class="ov-user">Signed in as <strong id="userDisplay">—</strong></div>
       <button class="switch-btn" onclick="switchUser()">Switch User</button>
@@ -227,25 +289,36 @@
   </div>
 </div>
 
+<!-- DISC PICKER -->
+<div class="picker-overlay" id="pickerOverlay" onclick="pickerBgClose(event)">
+  <div class="picker-sheet">
+    <div class="picker-hdr">
+      <div>
+        <div class="picker-title">Tag a Disc</div>
+        <div class="picker-sub" id="pickerSub"></div>
+      </div>
+      <button class="picker-close" onclick="closePicker()">✕</button>
+    </div>
+    <div class="picker-body" id="pickerBody"></div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════
-//  FIREBASE CONFIG
+//  FIREBASE
 // ═══════════════════════════════════════════════════
 const FB = 'https://disc-golf-caddy-2a712-default-rtdb.firebaseio.com';
 
 async function fbRead(path) {
   const r = await fetch(`${FB}/${path}.json`);
-  if (!r.ok) throw new Error('read failed');
-  return await r.json(); // returns null if nothing there yet
+  if (!r.ok) throw new Error('read');
+  return await r.json();
 }
-
 async function fbWrite(path, data) {
   const r = await fetch(`${FB}/${path}.json`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
+    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
   });
-  if (!r.ok) throw new Error('write failed');
+  if (!r.ok) throw new Error('write');
 }
 
 // ═══════════════════════════════════════════════════
@@ -306,22 +379,83 @@ const BACK_HOLES = [
 ];
 
 const LAYOUTS = {
-  short: { name:'Short Tees', key:'short', holes:SHORT_HOLES },
-  back:  { name:'Back Pad',   key:'back',  holes:BACK_HOLES  },
+  short:{ name:'Short Tees', key:'short', holes:SHORT_HOLES },
+  back: { name:'Back Pad',   key:'back',  holes:BACK_HOLES  },
 };
 
 // ═══════════════════════════════════════════════════
-//  STATE
+//  STATE  — all user data in one object
 // ═══════════════════════════════════════════════════
 let activeLayout = lsg('dgc_layout') || 'short';
 let uname  = lsg('dgc_username');
-let notes  = { short:{}, back:{} };
 let cur    = 0;
+let pickerHoleId = null;
+
+let userData = {
+  notes: { short:{}, back:{} },
+  tags:  { short:{}, back:{} },
+  bag:   []
+};
 
 function holes() { return LAYOUTS[activeLayout].holes; }
 function lsg(k)  { return localStorage.getItem(k); }
 function lss(k,v){ localStorage.setItem(k,v); }
 function lsr(k)  { localStorage.removeItem(k); }
+
+function normalizeData(raw) {
+  if (!raw) return { notes:{short:{},back:{}}, tags:{short:{},back:{}}, bag:[] };
+  // Handle previous version where notes were at root level
+  if (raw.short !== undefined || raw.back !== undefined) {
+    return { notes:{short:raw.short||{},back:raw.back||{}}, tags:{short:{},back:{}}, bag:[] };
+  }
+  return {
+    notes: raw.notes || { short:{}, back:{} },
+    tags:  raw.tags  || { short:{}, back:{} },
+    bag:   raw.bag   || []
+  };
+}
+
+// ═══════════════════════════════════════════════════
+//  CACHE
+// ═══════════════════════════════════════════════════
+function cacheLocally() {
+  Object.entries(userData.notes.short||{}).forEach(([k,v])=>lss('dgc_note_short_'+k,v));
+  Object.entries(userData.notes.back ||{}).forEach(([k,v])=>lss('dgc_note_back_'+k,v));
+  if (userData.bag?.length > 0) lss('dgc_bag', JSON.stringify(userData.bag));
+}
+
+function loadFromCache() {
+  ['short','back'].forEach(layout => {
+    LAYOUTS[layout].holes.forEach(h => {
+      const c = lsg('dgc_note_'+layout+'_'+h.id);
+      if (c) { if(!userData.notes[layout]) userData.notes[layout]={}; userData.notes[layout][h.id]=c; }
+    });
+  });
+  const b = lsg('dgc_bag');
+  if (b) try { userData.bag = JSON.parse(b); } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════
+//  SYNC
+// ═══════════════════════════════════════════════════
+let saveTimer;
+async function syncUserData() {
+  if (!uname) return;
+  try {
+    await fbWrite(`users/${uname}`, userData);
+    flashSave('✓ Synced');
+  } catch {
+    flashSave('📱 Saved locally');
+  }
+}
+function queueSync(delay=1400) { clearTimeout(saveTimer); saveTimer = setTimeout(syncUserData, delay); }
+
+function flashSave(msg) {
+  const el = document.querySelector('.card.active .save-status');
+  if (!el) return;
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
 
 // ═══════════════════════════════════════════════════
 //  LOGIN
@@ -331,173 +465,293 @@ async function handleLogin() {
   const btn  = document.getElementById('loginBtn');
   const name = inp.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
   if (!name) { inp.focus(); return; }
-
   btn.disabled = true;
   setLS('Connecting…');
-
   try {
-    const userData = await fbRead(`users/${name}`);
-
-    if (userData) {
-      // Returning user — load their notes
-      notes = normalizeNotes(userData);
+    const raw = await fbRead(`users/${name}`);
+    if (raw) {
+      userData = normalizeData(raw);
       setLS(`Welcome back, ${name}!`);
     } else {
-      // New user — create their record
-      notes = { short:{}, back:{} };
-      await fbWrite(`users/${name}`, notes);
+      userData = { notes:{short:{},back:{}}, tags:{short:{},back:{}}, bag:[] };
+      await fbWrite(`users/${name}`, userData);
     }
-
-    // Cache locally for offline resilience
-    cacheNotesLocally();
-
+    cacheLocally();
     uname = name;
     lss('dgc_username', name);
     closeLogin();
     document.getElementById('userDisplay').textContent = uname;
     build();
     fetchWind();
-
   } catch(e) {
     setLS('Connection failed — check internet and try again.', true);
     btn.disabled = false;
   }
 }
 
-function normalizeNotes(data) {
-  if (!data) return { short:{}, back:{} };
-  return { short: data.short || {}, back: data.back || {} };
-}
-
-function cacheNotesLocally() {
-  Object.entries(notes.short||{}).forEach(([k,v])=>lss('dgc_note_short_'+k,v));
-  Object.entries(notes.back ||{}).forEach(([k,v])=>lss('dgc_note_back_'+k,v));
-}
-
-function setLS(msg, err=false) {
-  const el = document.getElementById('loginStatus');
-  el.textContent = msg;
-  el.className = 'login-status' + (err ? ' err' : '');
-}
-function closeLogin() { document.getElementById('loginWrap').classList.remove('show'); }
-function showLogin()  { document.getElementById('loginWrap').classList.add('show'); setTimeout(()=>document.getElementById('nameInput').focus(),100); }
+function setLS(msg,err=false){ const el=document.getElementById('loginStatus'); el.textContent=msg; el.className='login-status'+(err?' err':''); }
+function closeLogin(){ document.getElementById('loginWrap').classList.remove('show'); }
+function showLogin() { document.getElementById('loginWrap').classList.add('show'); setTimeout(()=>document.getElementById('nameInput').focus(),100); }
 
 function switchUser() {
   closeOverview();
   lsr('dgc_username');
-  uname = null;
-  notes = { short:{}, back:{} };
-  document.getElementById('main').innerHTML = '';
-  document.getElementById('dots').innerHTML = '';
-  document.getElementById('ovGrid').innerHTML = '';
-  document.getElementById('nameInput').value = '';
-  cur = 0;
+  uname=null;
+  userData={ notes:{short:{},back:{}}, tags:{short:{},back:{}}, bag:[] };
+  document.getElementById('main').innerHTML='';
+  document.getElementById('dots').innerHTML='';
+  document.getElementById('ovGrid').innerHTML='';
+  document.getElementById('nameInput').value='';
+  cur=0;
   showLogin();
-}
-
-// ═══════════════════════════════════════════════════
-//  LAYOUT TOGGLE
-// ═══════════════════════════════════════════════════
-function switchLayout(layout) {
-  if (layout === activeLayout) return;
-  activeLayout = layout;
-  lss('dgc_layout', layout);
-  document.getElementById('ltShort').classList.toggle('active', layout==='short');
-  document.getElementById('ltBack') .classList.toggle('active', layout==='back');
-  document.getElementById('main').innerHTML = '';
-  document.getElementById('dots').innerHTML = '';
-  document.getElementById('ovGrid').innerHTML = '';
-  cur = 0;
-  build();
 }
 
 // ═══════════════════════════════════════════════════
 //  NOTES
 // ═══════════════════════════════════════════════════
 function getNote(id) {
-  return notes[activeLayout]?.[id] ?? lsg('dgc_note_'+activeLayout+'_'+id) ?? '';
+  return userData.notes[activeLayout]?.[id] ?? lsg('dgc_note_'+activeLayout+'_'+id) ?? '';
+}
+function queueNoteSave(id, val) {
+  if (!userData.notes[activeLayout]) userData.notes[activeLayout]={};
+  userData.notes[activeLayout][id] = val;
+  lss('dgc_note_'+activeLayout+'_'+id, val);
+  queueSync();
 }
 
-let saveTimer;
-function queueSave(id, val) {
-  if (!notes[activeLayout]) notes[activeLayout] = {};
-  notes[activeLayout][id] = val;
-  lss('dgc_note_'+activeLayout+'_'+id, val); // instant local cache
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(async () => {
-    if (!uname) return;
-    try {
-      await fbWrite(`users/${uname}`, notes);
-      flashSave('✓ Synced');
-    } catch {
-      flashSave('📱 Saved locally');
-    }
-  }, 1400);
+// ═══════════════════════════════════════════════════
+//  LAYOUT TOGGLE
+// ═══════════════════════════════════════════════════
+function switchLayout(layout) {
+  if (layout===activeLayout) return;
+  activeLayout=layout;
+  lss('dgc_layout',layout);
+  document.getElementById('ltShort').classList.toggle('active',layout==='short');
+  document.getElementById('ltBack') .classList.toggle('active',layout==='back');
+  document.getElementById('main').innerHTML='';
+  document.getElementById('dots').innerHTML='';
+  document.getElementById('ovGrid').innerHTML='';
+  cur=0;
+  build();
 }
 
-function flashSave(msg) {
-  const el = document.querySelector('.card.active .save-status');
+// ═══════════════════════════════════════════════════
+//  BAG UPLOAD & DISPLAY
+// ═══════════════════════════════════════════════════
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.trim());
+  const discs = [];
+  for (let i=1;i<lines.length;i++) {
+    if (!lines[i].trim()) continue;
+    const vals = lines[i].split(',');
+    const row = {};
+    headers.forEach((h,j)=>{ row[h]=(vals[j]||'').trim(); });
+    if (!row.name||!row.type) continue;
+    discs.push({
+      id:           row.id||String(i),
+      manufacturer: row.manufacturer||'',
+      name:         row.name,
+      type:         row.type,
+      plastic:      row.plastic||'',
+      speed:        parseFloat(row.speed)||0,
+      glide:        parseFloat(row.glide)||0,
+      turn:         parseFloat(row.turn)||0,
+      fade:         parseFloat(row.fade)||0,
+      condition:    row.condition||'',
+      dnotes:       row.notes||'',
+      weight:       parseFloat(row.weight)||0,
+    });
+  }
+  return discs;
+}
+
+function handleBagUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const discs = parseCSV(e.target.result);
+    if (discs.length===0) { alert('No discs found — make sure this is a DiscMate CSV export.'); return; }
+    userData.bag = discs;
+    lss('dgc_bag', JSON.stringify(discs));
+    syncUserData();
+    renderBagDisplay();
+    holes().forEach(h => refreshDiscSection(h.id));
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function renderBagDisplay() {
+  const el = document.getElementById('bagDisplay');
   if (!el) return;
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
+  const bag = userData.bag||[];
+  if (bag.length===0) {
+    el.innerHTML='<p style="font-size:13px;color:var(--muted);margin-bottom:12px">No bag loaded. Upload your DiscMate CSV export below.</p>';
+    return;
+  }
+  const c={Distance:0,Fairway:0,Midrange:0,Putter:0};
+  bag.forEach(d=>{ if(c[d.type]!==undefined) c[d.type]++; else c[d.type]=(c[d.type]||0)+1; });
+  const pills=[
+    c.Distance ? `<span class="bag-pill gd">${c.Distance} Distance</span>`:'',
+    c.Fairway  ? `<span class="bag-pill gf">${c.Fairway} Fairway</span>`:'',
+    c.Midrange ? `<span class="bag-pill gm">${c.Midrange} Midrange</span>`:'',
+    c.Putter   ? `<span class="bag-pill gp">${c.Putter} Putter</span>`:'',
+  ].filter(Boolean).join('');
+  el.innerHTML=`<div class="bag-counts">${pills}</div><p style="font-size:11px;color:var(--muted);margin-bottom:12px">${bag.length} discs loaded — re-upload CSV to update</p>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  DISC TAGGING
+// ═══════════════════════════════════════════════════
+const TYPE_CLASS = { Distance:'td', Fairway:'tf', Midrange:'tm', Putter:'tp' };
+const TYPE_DOT   = { Distance:'dd', Fairway:'df', Midrange:'dm', Putter:'dp' };
+const TYPE_GRP   = { Distance:'gd', Fairway:'gf', Midrange:'gm', Putter:'gp' };
+const TYPE_LBL   = { Distance:'Distance Drivers', Fairway:'Fairway Drivers', Midrange:'Midranges', Putter:'Putters' };
+
+function discSectionHTML(holeId) {
+  const bag = userData.bag||[];
+  const tagIds = userData.tags?.[activeLayout]?.[holeId]||[];
+  let chipsHtml='';
+  if (tagIds.length>0) {
+    chipsHtml='<div class="disc-chips">'+tagIds.map(id=>{
+      const d=bag.find(x=>x.id===id); if(!d) return '';
+      const tc=TYPE_CLASS[d.type]||'tp';
+      return `<div class="disc-chip ${tc}"><span>${d.name}</span><button class="chip-x" onclick="removeTag('${holeId}','${id}')">×</button></div>`;
+    }).join('')+'</div>';
+  } else {
+    chipsHtml='<p class="no-chips-msg">No disc tagged yet</p>';
+  }
+  if (bag.length>0) {
+    return chipsHtml+`<button class="tag-disc-btn" onclick="openPicker('${holeId}')">＋ Tag a Disc</button>`;
+  }
+  return `<p class="no-bag-hint" onclick="openOverview()">Upload your bag in All Holes to tag discs ↗</p>`;
+}
+
+function refreshDiscSection(holeId) {
+  const el=document.getElementById('ds-'+holeId);
+  if(el) el.innerHTML=discSectionHTML(holeId);
+}
+
+function openPicker(holeId) {
+  pickerHoleId=holeId;
+  document.getElementById('pickerSub').textContent=`Hole ${holeId} · ${LAYOUTS[activeLayout].name}`;
+  renderPickerBody();
+  document.getElementById('pickerOverlay').classList.add('open');
+}
+function closePicker() { document.getElementById('pickerOverlay').classList.remove('open'); pickerHoleId=null; }
+function pickerBgClose(e) { if(e.target===document.getElementById('pickerOverlay')) closePicker(); }
+
+function renderPickerBody() {
+  const body=document.getElementById('pickerBody');
+  const bag=userData.bag||[];
+  const tagged=userData.tags?.[activeLayout]?.[pickerHoleId]||[];
+  const order=['Distance','Fairway','Midrange','Putter'];
+  let html='';
+  order.forEach(type=>{
+    const discs=bag.filter(d=>d.type===type);
+    if(!discs.length) return;
+    html+=`<div class="disc-group-hdr ${TYPE_GRP[type]}">${TYPE_LBL[type]}</div>`;
+    discs.forEach(d=>{
+      const sel=tagged.includes(d.id);
+      const meta=[
+        d.manufacturer,
+        d.plastic&&d.plastic!=='Not specified'?d.plastic:null,
+        `${d.speed}/${d.glide}/${d.turn}/${d.fade}`,
+        d.weight>0?`${d.weight}g`:null,
+        d.condition&&d.condition!=='New'?d.condition:null
+      ].filter(Boolean).join(' · ');
+      html+=`<div class="disc-item${sel?' sel':''}" onclick="toggleTag('${pickerHoleId}','${d.id}')">
+        <div class="disc-dot ${TYPE_DOT[d.type]||'dp'}"></div>
+        <div class="disc-info">
+          <div class="disc-iname">${d.name}</div>
+          <div class="disc-imeta">${meta}</div>
+          ${d.dnotes?`<div class="disc-inote">${d.dnotes}</div>`:''}
+        </div>
+        <div class="disc-check">${sel?'✓':''}</div>
+      </div>`;
+    });
+  });
+  body.innerHTML=html||'<div style="padding:30px;text-align:center;color:var(--muted)">No discs in bag</div>';
+}
+
+function toggleTag(holeId, discId) {
+  if(!userData.tags) userData.tags={short:{},back:{}};
+  if(!userData.tags[activeLayout]) userData.tags[activeLayout]={};
+  if(!userData.tags[activeLayout][holeId]) userData.tags[activeLayout][holeId]=[];
+  const tags=userData.tags[activeLayout][holeId];
+  const idx=tags.indexOf(discId);
+  idx===-1 ? tags.push(discId) : tags.splice(idx,1);
+  renderPickerBody();
+  refreshDiscSection(holeId);
+  queueSync(800);
+}
+
+function removeTag(holeId, discId) {
+  if(!userData.tags?.[activeLayout]?.[holeId]) return;
+  const tags=userData.tags[activeLayout][holeId];
+  const idx=tags.indexOf(discId);
+  if(idx!==-1) tags.splice(idx,1);
+  refreshDiscSection(holeId);
+  queueSync(800);
 }
 
 // ═══════════════════════════════════════════════════
 //  WIND
 // ═══════════════════════════════════════════════════
-function degToCompass(d) {
-  return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16];
-}
+function degToCompass(d){ return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16]; }
 
 async function fetchWind() {
-  if (!navigator.geolocation) return;
-  const badge = document.getElementById('windBadge');
+  if(!navigator.geolocation) return;
+  const badge=document.getElementById('windBadge');
   badge.classList.add('loading');
   navigator.geolocation.getCurrentPosition(
-    async ({coords:{latitude:lat,longitude:lon}}) => {
-      try {
-        const d = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=mph&timezone=auto`)).json();
-        document.getElementById('windSpd').textContent = Math.round(d.current.wind_speed_10m);
-        document.getElementById('windDir').textContent = degToCompass(d.current.wind_direction_10m);
-        document.getElementById('windArrow').style.transform = `rotate(${(d.current.wind_direction_10m+180)%360}deg)`;
-      } catch(e) { /* silent */ }
+    async({coords:{latitude:lat,longitude:lon}})=>{
+      try{
+        const d=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=mph&timezone=auto`)).json();
+        document.getElementById('windSpd').textContent=Math.round(d.current.wind_speed_10m);
+        document.getElementById('windDir').textContent=degToCompass(d.current.wind_direction_10m);
+        document.getElementById('windArrow').style.transform=`rotate(${(d.current.wind_direction_10m+180)%360}deg)`;
+      }catch(e){}
       badge.classList.remove('loading');
     },
-    () => badge.classList.remove('loading')
+    ()=>badge.classList.remove('loading')
   );
 }
 
 // ═══════════════════════════════════════════════════
 //  BUILD
 // ═══════════════════════════════════════════════════
-const TAG = { ob:['OB','tag-ob'], mando:['MANDO','tag-mando'], note:['NOTE','tag-note'] };
+const TAG={ob:['OB','tag-ob'],mando:['MANDO','tag-mando'],note:['NOTE','tag-note']};
 
 function build() {
   const main=document.getElementById('main');
   const dotsEl=document.getElementById('dots');
   const grid=document.getElementById('ovGrid');
-  const layoutHoles = holes();
+  const layoutHoles=holes();
 
-  document.getElementById('ovTitle').textContent = `${LAYOUTS[activeLayout].name} — All 24 Holes`;
-  document.getElementById('ovPar').textContent   = `Course Par ${layoutHoles.reduce((s,h)=>s+h.par,0)}`;
-  document.getElementById('userDisplay').textContent = uname || '—';
-  document.getElementById('ltShort').classList.toggle('active', activeLayout==='short');
-  document.getElementById('ltBack') .classList.toggle('active', activeLayout==='back');
+  document.getElementById('ovTitle').textContent=`${LAYOUTS[activeLayout].name} — All 24 Holes`;
+  document.getElementById('ovPar').textContent=`Course Par ${layoutHoles.reduce((s,h)=>s+h.par,0)}`;
+  document.getElementById('userDisplay').textContent=uname||'—';
+  document.getElementById('ltShort').classList.toggle('active',activeLayout==='short');
+  document.getElementById('ltBack') .classList.toggle('active',activeLayout==='back');
+  renderBagDisplay();
 
-  layoutHoles.forEach((h,i) => {
-    const card = document.createElement('div');
-    card.className = `card par${h.par}${i===0?' active':''}`;
-    card.id = 'card-'+i;
+  layoutHoles.forEach((h,i)=>{
+    const card=document.createElement('div');
+    card.className=`card par${h.par}${i===0?' active':''}`;
+    card.id='card-'+i;
 
-    const rulesHtml = h.rules.length
+    const rulesHtml=h.rules.length
       ? h.rules.map(r=>{const[lbl,cls]=TAG[r.t];return`<div class="rule ${r.t}"><span class="rule-tag ${cls}">${lbl}</span><span>${r.s}</span></div>`;}).join('')
       : '<p class="no-rules">No specific local rules for this hole.</p>';
 
-    const imgHtml = h.img
-      ? `<img class="map-img" src="${h.img}" alt="Hole ${h.id}" onerror="this.outerHTML='<div class=\\'map-missing\\'><span>🗺</span>Image not found</div>'">`
-      : `<div class="map-missing"><span>📸</span>Map coming soon</div>`;
+    const imgHtml=h.img
+      ?`<img class="map-img" src="${h.img}" alt="Hole ${h.id}" onerror="this.outerHTML='<div class=\\'map-missing\\'><span>🗺</span>Image not found</div>'">`
+      :`<div class="map-missing"><span>📸</span>Map coming soon</div>`;
 
-    card.innerHTML = `
+    card.innerHTML=`
       <div class="hero">
         <div class="hero-num">${h.id}</div>
         <div class="hero-meta">
@@ -512,25 +766,28 @@ function build() {
       <div class="map-wrap">${imgHtml}</div>
       <div class="section"><div class="sec-label">Course Rules</div>${rulesHtml}</div>
       <div class="section">
+        <div class="sec-label">Disc Selection</div>
+        <div id="ds-${h.id}">${discSectionHTML(h.id)}</div>
+      </div>
+      <div class="section">
         <div class="sec-label">My Notes</div>
-        <textarea class="notes-ta" id="ta-${h.id}" placeholder="Disc, line, elevation, wind effect…">${getNote(h.id)}</textarea>
+        <textarea class="notes-ta" id="ta-${h.id}" placeholder="Line, elevation, wind effect…">${getNote(h.id)}</textarea>
         <div class="save-status"></div>
       </div>
       <div class="spacer"></div>`;
 
     main.appendChild(card);
-    card.querySelector('.notes-ta').addEventListener('input', e=>queueSave(h.id, e.target.value));
+    card.querySelector('.notes-ta').addEventListener('input',e=>queueNoteSave(h.id,e.target.value));
 
-    const dot = document.createElement('div');
-    dot.className = `dot p${h.par}${i===0?' active':''}`;
-    dot.id = 'dot-'+i; dot.onclick = ()=>go(i);
+    const dot=document.createElement('div');
+    dot.className=`dot p${h.par}${i===0?' active':''}`;
+    dot.id='dot-'+i; dot.onclick=()=>go(i);
     dotsEl.appendChild(dot);
 
-    const cell = document.createElement('div');
-    cell.className = `ov-cell${i===0?' cur':''}`;
-    cell.id = 'ovc-'+i;
-    cell.innerHTML = `<div class="ov-n p${h.par}">${h.id}</div><div class="ov-inf">Par ${h.par} · ${h.feet}ft</div>`;
-    cell.onclick = ()=>{go(i);closeOverview();};
+    const cell=document.createElement('div');
+    cell.className=`ov-cell${i===0?' cur':''}`;cell.id='ovc-'+i;
+    cell.innerHTML=`<div class="ov-n p${h.par}">${h.id}</div><div class="ov-inf">Par ${h.par} · ${h.feet}ft</div>`;
+    cell.onclick=()=>{go(i);closeOverview();};
     grid.appendChild(cell);
   });
 
@@ -540,28 +797,28 @@ function build() {
 // ═══════════════════════════════════════════════════
 //  NAVIGATION
 // ═══════════════════════════════════════════════════
-function go(idx) {
+function go(idx){
   ['card-','dot-','ovc-'].forEach(p=>{
     document.getElementById(p+cur)?.classList.remove(p==='ovc-'?'cur':'active');
     document.getElementById(p+idx)?.classList.add(p==='ovc-'?'cur':'active');
   });
-  cur = idx;
+  cur=idx;
   document.getElementById('dot-'+cur)?.scrollIntoView({inline:'center',behavior:'smooth'});
-  document.getElementById('main').scrollTop = 0;
+  document.getElementById('main').scrollTop=0;
   refreshNav();
 }
-function navigate(dir) { const n=cur+dir; if(n>=0&&n<holes().length) go(n); }
-function refreshNav() {
-  document.getElementById('prevBtn').disabled = cur===0;
-  document.getElementById('nextBtn').disabled = cur===holes().length-1;
+function navigate(dir){const n=cur+dir;if(n>=0&&n<holes().length)go(n);}
+function refreshNav(){
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').disabled=cur===holes().length-1;
 }
 
 // ═══════════════════════════════════════════════════
 //  OVERVIEW
 // ═══════════════════════════════════════════════════
-function openOverview()  { document.getElementById('overlay').classList.add('open'); }
-function closeOverview() { document.getElementById('overlay').classList.remove('open'); }
-function bgClose(e)      { if(e.target===document.getElementById('overlay')) closeOverview(); }
+function openOverview()  {document.getElementById('overlay').classList.add('open'); renderBagDisplay();}
+function closeOverview() {document.getElementById('overlay').classList.remove('open');}
+function bgClose(e)      {if(e.target===document.getElementById('overlay'))closeOverview();}
 
 // ═══════════════════════════════════════════════════
 //  SWIPE + KEYBOARD
@@ -570,38 +827,36 @@ let sx=0,sy=0;
 document.getElementById('main').addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
 document.getElementById('main').addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.6) navigate(dx<0?1:-1);
+  if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.6)navigate(dx<0?1:-1);
 },{passive:true});
 document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'||e.key==='ArrowDown') navigate(1);
-  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')   navigate(-1);
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);
+  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  navigate(-1);
 });
 
 // ═══════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════
 if (uname) {
-  // Load from local cache immediately for instant startup
-  ['short','back'].forEach(layout => {
-    LAYOUTS[layout].holes.forEach(h => {
-      const c = lsg('dgc_note_'+layout+'_'+h.id);
-      if (c) { if(!notes[layout]) notes[layout]={}; notes[layout][h.id]=c; }
-    });
-  });
+  loadFromCache();
   build();
   fetchWind();
   // Background sync from Firebase
-  fbRead(`users/${uname}`).then(data => {
-    if (!data) return;
-    notes = normalizeNotes(data);
-    holes().forEach(h => {
-      const n = notes[activeLayout]?.[h.id];
-      if (n !== undefined) {
-        const ta = document.getElementById('ta-'+h.id);
-        if (ta && ta.value !== n) ta.value = n;
-        lss('dgc_note_'+activeLayout+'_'+h.id, n);
+  fbRead(`users/${uname}`).then(raw=>{
+    if(!raw) return;
+    userData=normalizeData(raw);
+    // Refresh note textareas
+    holes().forEach(h=>{
+      const n=userData.notes[activeLayout]?.[h.id];
+      if(n!==undefined){
+        const ta=document.getElementById('ta-'+h.id);
+        if(ta&&ta.value!==n) ta.value=n;
       }
     });
+    // Refresh disc sections
+    holes().forEach(h=>refreshDiscSection(h.id));
+    renderBagDisplay();
+    cacheLocally();
   }).catch(()=>{});
 } else {
   showLogin();
