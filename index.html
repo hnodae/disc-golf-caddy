@@ -52,6 +52,7 @@
     .hdr-center { display:flex; flex-direction:column; align-items:center; gap:4px; }
     .hdr-title  { font-family:'Bebas Neue',cursive; font-size:14px; letter-spacing:2.5px; color:var(--muted); text-align:center; line-height:1; }
     .hdr-title span { color:var(--accent); }
+    .hdr-actions { position:absolute; right:14px; display:flex; align-items:center; gap:6px; }
     .layout-toggle { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px; }
     .lt-btn { background:none; border:none; color:var(--muted); font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:3px 12px; border-radius:16px; cursor:pointer; transition:background .15s,color .15s; touch-action:manipulation; }
     .lt-btn.active { background:var(--accent); color:var(--bg); }
@@ -61,8 +62,10 @@
     .wind-arrow { font-size:13px; display:inline-block; color:var(--accent); transition:transform .6s ease; }
     .wind-spd   { font-family:'Bebas Neue',cursive; font-size:15px; color:var(--text); line-height:1; }
     .wind-dir   { font-size:10px; font-weight:700; letter-spacing:.5px; color:var(--muted); }
-    .all-btn { position:absolute; right:14px; background:none; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:6px 11px; cursor:pointer; transition:border-color .2s,color .2s; }
-    .all-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .hdr-btn { background:none; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:'Barlow',sans-serif; font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; padding:7px 10px; cursor:pointer; transition:border-color .2s,color .2s,background .2s; white-space:nowrap; }
+    .hdr-btn:hover,.hdr-btn:active { border-color:var(--accent); color:var(--accent); }
+    .hdr-btn.primary { background:var(--accent); border-color:var(--accent); color:var(--bg); }
+    .hdr-btn.round-live { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
 
     /* MAIN */
     .main { position:fixed; top:var(--hdr); bottom:var(--ftr); left:0; right:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
@@ -259,7 +262,60 @@
     .disc-add-btn:hover { border-color:var(--accent); color:var(--accent); }
     .disc-add-btn:disabled,
     .disc-add-btn.added { opacity:.7; cursor:default; border-color:var(--border); color:var(--muted); }
+    .round-sheet { max-width:720px; margin:16px auto; }
+    .round-body { padding-bottom:10px; }
+    .round-fields { display:grid; grid-template-columns:1fr; gap:10px; }
+    .round-field { display:flex; flex-direction:column; gap:6px; }
+    .round-input {
+      width:100%; min-width:0; background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:12px 14px; color:var(--text); font-family:'Barlow',sans-serif;
+      font-size:14px; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none;
+    }
+    .round-input:focus { border-color:var(--accent); }
+    .round-input::placeholder { color:var(--muted); }
+    .round-snapshot { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; }
+    .round-snapshot-top { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:12px; }
+    .round-snapshot-hole { font-family:'Bebas Neue',cursive; font-size:30px; letter-spacing:1px; line-height:1; color:var(--accent); }
+    .round-snapshot-meta { font-size:12px; color:var(--muted); margin-top:4px; }
+    .round-snapshot-stat { text-align:right; }
+    .round-snapshot-stat strong { display:block; font-family:'Bebas Neue',cursive; font-size:28px; color:var(--text); line-height:1; }
+    .round-snapshot-grid { display:grid; gap:10px; }
+    .round-snapshot-item { display:flex; flex-direction:column; gap:6px; }
+    .round-snapshot-empty { font-size:12px; color:var(--muted); font-style:italic; line-height:1.5; }
+    .round-actions { display:flex; justify-content:flex-end; gap:10px; padding:0 18px 16px; }
+    .round-start-btn {
+      background:var(--accent); border:1px solid var(--accent); color:var(--bg); border-radius:10px;
+      padding:10px 16px; font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:1.4px; cursor:pointer;
+    }
+    .round-focus-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .round-focus-item { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; min-width:0; }
+    .round-focus-label { font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .round-focus-value { font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+    .collapsible-section { padding:0; overflow:hidden; }
+    .collapsible-summary {
+      list-style:none; display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:16px 18px; cursor:pointer;
+    }
+    .collapsible-summary::-webkit-details-marker { display:none; }
+    .collapsible-summary .sec-label { margin-bottom:0; }
+    .collapsible-hint { font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
+    .collapsible-section[open] .collapsible-hint { color:var(--accent); }
+    .collapsible-body { padding:0 18px 16px; }
+    .round-plan-empty { font-size:13px; color:var(--muted); font-style:italic; line-height:1.5; }
     .ov-bottom { height:20px; }
+
+    @media (max-width:640px) {
+      .hdr { padding:0 10px; }
+      .hdr-center { max-width:calc(100% - 186px); }
+      .wind-badge { left:10px; padding:5px 9px 5px 7px; }
+      .hdr-actions { right:10px; gap:5px; }
+      .hdr-btn { font-size:9px; letter-spacing:1px; padding:7px 8px; }
+      .hero { padding:16px 16px 14px; gap:14px; }
+      .section { padding:14px 16px; }
+      .round-actions { padding:0 16px 16px; }
+      .round-focus-grid { grid-template-columns:1fr; }
+      .round-snapshot-top { align-items:center; }
+    }
   </style>
 </head>
 <body>
@@ -293,7 +349,10 @@
       <button class="lt-btn"        id="ltBack"  onclick="switchLayout('back')">Back</button>
     </div>
   </div>
-  <button class="all-btn" onclick="openOverview()">All Holes</button>
+  <div class="hdr-actions">
+    <button class="hdr-btn primary" id="roundToggleBtn" onclick="handleRoundToggle()">Start Round</button>
+    <button class="hdr-btn" onclick="openOverview()">All Holes</button>
+  </div>
 </header>
 
 <!-- MAIN -->
@@ -343,6 +402,67 @@
       <button class="switch-btn" onclick="switchUser()">Switch User</button>
     </div>
     <div class="ov-bottom"></div>
+  </div>
+</div>
+
+<!-- ROUND SETUP -->
+<div class="overlay" id="roundOverlay" onclick="roundBgClose(event)">
+  <div class="ov-sheet round-sheet">
+    <div class="ov-hdr">
+      <div>
+        <div class="ov-title">Start Round</div>
+        <div class="ov-par">Optional pre-round setup for quick in-round reference</div>
+      </div>
+      <button class="ov-close" onclick="closeRoundSetup()">✕</button>
+    </div>
+    <div class="round-body">
+      <div class="ov-section">
+        <div class="sec-label">Pre-Round</div>
+        <div class="round-fields">
+          <label class="round-field">
+            <span class="gp-label">Today's Intent</span>
+            <input
+              type="text"
+              class="round-input"
+              id="roundIntentInput"
+              placeholder="How do you want to play today?"
+              autocomplete="off"
+              oninput="updatePreRoundField('todaysIntent', this.value)"
+            >
+          </label>
+          <label class="round-field">
+            <span class="gp-label">Swing Cue</span>
+            <input
+              type="text"
+              class="round-input"
+              id="roundSwingInput"
+              placeholder="One simple body cue"
+              autocomplete="off"
+              oninput="updatePreRoundField('swingCue', this.value)"
+            >
+          </label>
+          <label class="round-field">
+            <span class="gp-label">Mental Cue</span>
+            <input
+              type="text"
+              class="round-input"
+              id="roundMentalInput"
+              placeholder="One thought to keep you centered"
+              autocomplete="off"
+              oninput="updatePreRoundField('mentalCue', this.value)"
+            >
+          </label>
+        </div>
+      </div>
+      <div class="ov-section">
+        <div class="sec-label">First Hole Snapshot</div>
+        <div id="roundSnapshot"></div>
+      </div>
+      <div class="round-actions">
+        <button class="switch-btn" type="button" onclick="closeRoundSetup()">Back</button>
+        <button class="round-start-btn" type="button" onclick="enterRoundMode()">Enter Round Mode</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -484,6 +604,7 @@ let discSearchDebounceTimer = null;
 let discSearchRequestToken = 0;
 let discSearchAbortController = null;
 let discSearchInFlightQuery = '';
+let roundMode = false;
 const discSearchCache = new Map();
 
 const DISC_SEARCH_BUTTON_MIN_CHARS = 2;
@@ -508,6 +629,7 @@ const GAME_PLAN_INTENT_OPTIONS = [
 
 function createLayoutBucket() { return { short:{}, back:{} }; }
 function createEmptyGamePlan() { return { target:'', intent:'', avoid:'', bailout:'' }; }
+function createEmptyPreRound() { return { todaysIntent:'', swingCue:'', mentalCue:'' }; }
 function createEmptyUserData() {
   return {
     notes:    createLayoutBucket(),
@@ -551,6 +673,7 @@ function normalizeGamePlanBucket(bucket) {
 }
 
 let userData = createEmptyUserData();
+let preRound = createEmptyPreRound();
 
 function holes() { return LAYOUTS[activeLayout].holes; }
 function lsg(k)  { return localStorage.getItem(k); }
@@ -559,6 +682,31 @@ function lsr(k)  { localStorage.removeItem(k); }
 function userCacheKey(type, ...parts) {
   if (!uname) return null;
   return ['dgc', uname, type, ...parts].join('_');
+}
+function preRoundCacheKey() {
+  return userCacheKey('preround') || 'dgc_guest_preround';
+}
+function loadPreRoundState() {
+  const cached = lsg(preRoundCacheKey());
+  if (!cached) return createEmptyPreRound();
+  try {
+    const raw = JSON.parse(cached);
+    return {
+      todaysIntent: typeof raw?.todaysIntent === 'string' ? raw.todaysIntent : '',
+      swingCue:     typeof raw?.swingCue === 'string' ? raw.swingCue : '',
+      mentalCue:    typeof raw?.mentalCue === 'string' ? raw.mentalCue : '',
+    };
+  } catch(e) {
+    return createEmptyPreRound();
+  }
+}
+function savePreRoundState() {
+  lss(preRoundCacheKey(), JSON.stringify(preRound));
+}
+function updatePreRoundField(field, value) {
+  if (!(field in preRound)) return;
+  preRound[field] = value;
+  savePreRoundState();
 }
 
 function normalizeData(raw) {
@@ -666,9 +814,12 @@ async function handleLogin() {
       await fbWrite(`users/${name}`, userData);
     }
     uname = name;
+    roundMode = false;
+    preRound = loadPreRoundState();
     cacheLocally();
     lss('dgc_username', name);
     closeLogin();
+    closeRoundSetup();
     document.getElementById('userDisplay').textContent = uname;
     build();
     fetchWind();
@@ -684,8 +835,13 @@ function showLogin() { document.getElementById('loginWrap').classList.add('show'
 
 function switchUser() {
   closeOverview();
+  closeRoundSetup();
+  closePicker();
+  closeDiscSearchModal();
   lsr('dgc_username');
   uname=null;
+  roundMode=false;
+  preRound=createEmptyPreRound();
   userData=createEmptyUserData();
   document.getElementById('main').innerHTML='';
   document.getElementById('dots').innerHTML='';
@@ -732,6 +888,7 @@ function queueGamePlanSave(id, field, val) {
   const key = userCacheKey('gameplan', activeLayout, id);
   if (key) lss(key, JSON.stringify(plan));
   renderGamePlanSummary();
+  refreshRoundSnapshotIfOpen();
   queueSync();
 }
 
@@ -820,6 +977,155 @@ function renderGamePlanSummary() {
     </div>`;
 }
 
+function getTaggedDiscs(holeId, layout=activeLayout) {
+  const tagIds = userData.tags?.[layout]?.[holeId] || [];
+  return tagIds.map(id => (userData.bag||[]).find(d => d.id === id)).filter(Boolean);
+}
+function getGamePlanForLayout(holeId, layout=activeLayout) {
+  return normalizeGamePlanEntry(userData.gamePlan?.[layout]?.[holeId]);
+}
+function getGamePlanSummaryText(holeId, layout=activeLayout) {
+  const plan = getGamePlanForLayout(holeId, layout);
+  const parts = [];
+  if (hasGamePlanValue(plan.target)) parts.push(`Aim ${plan.target}`);
+  if (hasGamePlanValue(plan.intent)) parts.push(plan.intent);
+  if (hasGamePlanValue(plan.avoid)) parts.push(`Avoid ${plan.avoid}`);
+  if (hasGamePlanValue(plan.bailout)) parts.push(`Bailout ${plan.bailout}`);
+  return parts.join(' · ');
+}
+function roundFocusSectionHTML() {
+  const items = [
+    ['Today\'s Intent', preRound.todaysIntent],
+    ['Swing Cue', preRound.swingCue],
+    ['Mental Cue', preRound.mentalCue],
+  ].filter(([, value]) => value.trim() !== '');
+  if (!items.length) return '';
+  return `
+    <div class="section">
+      <div class="sec-label">Round Focus</div>
+      <div class="round-focus-grid">
+        ${items.map(([label, value]) => `
+          <div class="round-focus-item">
+            <div class="round-focus-label">${escapeHTML(label)}</div>
+            <div class="round-focus-value">${escapeHTML(value)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+function roundGamePlanSectionHTML(holeId) {
+  const plan = getGamePlan(holeId);
+  const items = [
+    ['Aim Point', plan.target],
+    ['Intent', plan.intent],
+    ['Avoid', plan.avoid],
+    ['Bailout', plan.bailout],
+  ].filter(([, value]) => hasGamePlanValue(value));
+  if (!items.length) return '<p class="round-plan-empty">No saved game plan yet. Exit Round Mode to build one.</p>';
+  return `
+    <div class="summary-list">
+      ${items.map(([label, value]) => `
+        <div class="summary-row">
+          <span class="summary-key">${escapeHTML(label)}</span>
+          <span class="summary-val">${escapeHTML(value)}</span>
+        </div>
+      `).join('')}
+    </div>`;
+}
+function collapsibleSectionHTML(label, content, open=false) {
+  return `
+    <details class="section collapsible-section"${open ? ' open' : ''}>
+      <summary class="collapsible-summary">
+        <span class="sec-label">${escapeHTML(label)}</span>
+        <span class="collapsible-hint">Tap</span>
+      </summary>
+      <div class="collapsible-body">${content}</div>
+    </details>`;
+}
+function renderRoundSnapshot() {
+  const el = document.getElementById('roundSnapshot');
+  if (!el) return;
+  const firstHole = holes()[0];
+  if (!firstHole) {
+    el.innerHTML = '<div class="round-snapshot"><div class="round-snapshot-empty">No hole data available for this layout.</div></div>';
+    return;
+  }
+  const tagged = getTaggedDiscs(firstHole.id, activeLayout);
+  const planSummary = getGamePlanSummaryText(firstHole.id, activeLayout);
+  el.innerHTML = `
+    <div class="round-snapshot">
+      <div class="round-snapshot-top">
+        <div>
+          <div class="round-snapshot-hole">Hole ${escapeHTML(firstHole.id)}</div>
+          <div class="round-snapshot-meta">Par ${firstHole.par} · ${firstHole.feet} ft · ${escapeHTML(LAYOUTS[activeLayout].name)}</div>
+        </div>
+        <div class="round-snapshot-stat">
+          <strong>${firstHole.par}</strong>
+          <div class="round-snapshot-meta">Par</div>
+        </div>
+      </div>
+      <div class="round-snapshot-grid">
+        <div class="round-snapshot-item">
+          <div class="gp-label">Tagged Discs</div>
+          ${tagged.length
+            ? `<div class="disc-chips">${tagged.map(d => `<div class="disc-chip ${TYPE_CLASS[d.type]||'tp'}"><span>${escapeHTML(d.name)}</span></div>`).join('')}</div>`
+            : '<div class="round-snapshot-empty">No tagged discs on the opener yet.</div>'
+          }
+        </div>
+        <div class="round-snapshot-item">
+          <div class="gp-label">Aim / Game Plan</div>
+          <div class="${planSummary ? '' : 'round-snapshot-empty'}">${planSummary ? escapeHTML(planSummary) : 'No saved aim point or plan summary yet.'}</div>
+        </div>
+      </div>
+    </div>`;
+}
+function refreshRoundSnapshotIfOpen() {
+  if (document.getElementById('roundOverlay')?.classList.contains('open')) renderRoundSnapshot();
+}
+function renderRoundSetup() {
+  const intentInput = document.getElementById('roundIntentInput');
+  const swingInput = document.getElementById('roundSwingInput');
+  const mentalInput = document.getElementById('roundMentalInput');
+  if (intentInput) intentInput.value = preRound.todaysIntent;
+  if (swingInput) swingInput.value = preRound.swingCue;
+  if (mentalInput) mentalInput.value = preRound.mentalCue;
+  renderRoundSnapshot();
+}
+function updateRoundEntryPoint() {
+  const btn = document.getElementById('roundToggleBtn');
+  if (!btn) return;
+  btn.textContent = roundMode ? 'Exit Round' : 'Start Round';
+  btn.classList.toggle('primary', !roundMode);
+  btn.classList.toggle('round-live', roundMode);
+}
+function openRoundSetup() {
+  renderRoundSetup();
+  document.getElementById('roundOverlay').classList.add('open');
+}
+function closeRoundSetup() {
+  document.getElementById('roundOverlay').classList.remove('open');
+}
+function roundBgClose(e) {
+  if (e.target === document.getElementById('roundOverlay')) closeRoundSetup();
+}
+function enterRoundMode() {
+  roundMode = true;
+  savePreRoundState();
+  closeRoundSetup();
+  updateRoundEntryPoint();
+  build();
+}
+function exitRoundMode() {
+  if (!roundMode) return;
+  roundMode = false;
+  updateRoundEntryPoint();
+  build();
+}
+function handleRoundToggle() {
+  if (roundMode) exitRoundMode();
+  else openRoundSetup();
+}
+
 // ═══════════════════════════════════════════════════
 //  LAYOUT TOGGLE
 // ═══════════════════════════════════════════════════
@@ -834,6 +1140,7 @@ function switchLayout(layout) {
   document.getElementById('ovGrid').innerHTML='';
   cur=0;
   build();
+  refreshRoundSnapshotIfOpen();
 }
 
 // ═══════════════════════════════════════════════════
@@ -847,6 +1154,7 @@ function persistBag(discs) {
   renderBagDisplay();
   holes().forEach(h => refreshDiscSection(h.id));
   if (pickerHoleId) renderPickerBody();
+  refreshRoundSnapshotIfOpen();
 }
 
 function parseCSV(text) {
@@ -1207,6 +1515,7 @@ function toggleTag(holeId, discId) {
   idx===-1 ? tags.push(discId) : tags.splice(idx,1);
   renderPickerBody();
   refreshDiscSection(holeId);
+  refreshRoundSnapshotIfOpen();
   queueSync(800);
 }
 
@@ -1216,6 +1525,7 @@ function removeTag(holeId, discId) {
   const idx=tags.indexOf(discId);
   if(idx!==-1) tags.splice(idx,1);
   refreshDiscSection(holeId);
+  refreshRoundSnapshotIfOpen();
   queueSync(800);
 }
 
@@ -1252,18 +1562,25 @@ function build() {
   const dotsEl=document.getElementById('dots');
   const grid=document.getElementById('ovGrid');
   const layoutHoles=holes();
+  const activeIndex = Math.min(cur, Math.max(layoutHoles.length - 1, 0));
+
+  main.innerHTML='';
+  dotsEl.innerHTML='';
+  grid.innerHTML='';
+  cur = activeIndex;
 
   document.getElementById('ovTitle').textContent=`${LAYOUTS[activeLayout].name} — All 24 Holes`;
   document.getElementById('ovPar').textContent=`Course Par ${layoutHoles.reduce((s,h)=>s+h.par,0)}`;
   document.getElementById('userDisplay').textContent=uname||'—';
   document.getElementById('ltShort').classList.toggle('active',activeLayout==='short');
   document.getElementById('ltBack') .classList.toggle('active',activeLayout==='back');
+  updateRoundEntryPoint();
   renderBagDisplay();
   renderGamePlanSummary();
 
   layoutHoles.forEach((h,i)=>{
     const card=document.createElement('div');
-    card.className=`card par${h.par}${i===0?' active':''}`;
+    card.className=`card par${h.par}${i===activeIndex?' active':''}`;
     card.id='card-'+i;
 
     const rulesHtml=h.rules.length
@@ -1273,6 +1590,23 @@ function build() {
     const imgHtml=h.img
       ?`<img class="map-img" src="${h.img}" alt="Hole ${h.id}" onerror="this.outerHTML='<div class=\\'map-missing\\'><span>🗺</span>Image not found</div>'">`
       :`<div class="map-missing"><span>📸</span>Map coming soon</div>`;
+    const rulesSection = roundMode
+      ? collapsibleSectionHTML('Course Rules', rulesHtml)
+      : `<div class="section"><div class="sec-label">Course Rules</div>${rulesHtml}</div>`;
+    const gamePlanSection = roundMode
+      ? roundGamePlanSectionHTML(h.id)
+      : gamePlanSectionHTML(h.id);
+    const notesSection = roundMode
+      ? collapsibleSectionHTML('My Notes', `
+          <textarea class="notes-ta" id="ta-${h.id}" placeholder="Line, elevation, wind effect…">${escapeHTML(getNote(h.id))}</textarea>
+          <div class="save-status"></div>
+        `)
+      : `
+        <div class="section">
+          <div class="sec-label">My Notes</div>
+          <textarea class="notes-ta" id="ta-${h.id}" placeholder="Line, elevation, wind effect…">${escapeHTML(getNote(h.id))}</textarea>
+          <div class="save-status"></div>
+        </div>`;
 
     card.innerHTML=`
       <div class="hero">
@@ -1286,22 +1620,19 @@ function build() {
           </div>
         </div>
       </div>
+      ${roundMode ? roundFocusSectionHTML() : ''}
       <div class="map-wrap">${imgHtml}</div>
-      <div class="section"><div class="sec-label">Course Rules</div>${rulesHtml}</div>
+      ${rulesSection}
       <div class="section">
         <div class="sec-label">Disc Selection</div>
         <div id="ds-${h.id}">${discSectionHTML(h.id)}</div>
       </div>
       <div class="section">
         <div class="sec-label">Game Plan</div>
-        ${gamePlanSectionHTML(h.id)}
+        ${gamePlanSection}
         <div class="save-status"></div>
       </div>
-      <div class="section">
-        <div class="sec-label">My Notes</div>
-        <textarea class="notes-ta" id="ta-${h.id}" placeholder="Line, elevation, wind effect…">${escapeHTML(getNote(h.id))}</textarea>
-        <div class="save-status"></div>
-      </div>
+      ${notesSection}
       <div class="spacer"></div>`;
 
     main.appendChild(card);
@@ -1312,12 +1643,12 @@ function build() {
     });
 
     const dot=document.createElement('div');
-    dot.className=`dot p${h.par}${i===0?' active':''}`;
+    dot.className=`dot p${h.par}${i===activeIndex?' active':''}`;
     dot.id='dot-'+i; dot.onclick=()=>go(i);
     dotsEl.appendChild(dot);
 
     const cell=document.createElement('div');
-    cell.className=`ov-cell${i===0?' cur':''}`;cell.id='ovc-'+i;
+    cell.className=`ov-cell${i===activeIndex?' cur':''}`;cell.id='ovc-'+i;
     cell.innerHTML=`<div class="ov-n p${h.par}">${h.id}</div><div class="ov-inf">Par ${h.par} · ${h.feet}ft</div>`;
     cell.onclick=()=>{go(i);closeOverview();};
     grid.appendChild(cell);
@@ -1363,6 +1694,7 @@ document.getElementById('main').addEventListener('touchend',e=>{
 },{passive:true});
 document.addEventListener('keydown',e=>{
   if (e.key==='Escape') {
+    if (document.getElementById('roundOverlay').classList.contains('open')) { closeRoundSetup(); return; }
     if (document.getElementById('discSearchOverlay').classList.contains('open')) { closeDiscSearchModal(); return; }
     if (document.getElementById('pickerOverlay').classList.contains('open')) { closePicker(); return; }
     if (document.getElementById('overlay').classList.contains('open')) { closeOverview(); return; }
@@ -1376,6 +1708,7 @@ document.addEventListener('keydown',e=>{
 // ═══════════════════════════════════════════════════
 if (uname) {
   loadFromCache();
+  preRound = loadPreRoundState();
   build();
   fetchWind();
   // Background sync from Firebase
@@ -1395,6 +1728,7 @@ if (uname) {
     holes().forEach(h=>refreshDiscSection(h.id));
     renderBagDisplay();
     renderGamePlanSummary();
+    refreshRoundSnapshotIfOpen();
     cacheLocally();
   }).catch(()=>{});
 } else {
