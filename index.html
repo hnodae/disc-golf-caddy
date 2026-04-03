@@ -216,6 +216,44 @@
     }
     .upload-csv-label:hover { border-color:var(--accent); }
     .upload-csv-input { display:none; }
+    .bag-import-actions { display:flex; flex-wrap:wrap; gap:10px; }
+    .search-db-btn { appearance:none; }
+    .search-db-btn:disabled { opacity:.6; cursor:default; }
+    .disc-search-sheet { max-width:720px; margin:16px auto; }
+    .disc-search-body { padding:16px 18px 20px; }
+    .disc-search-controls { display:flex; gap:10px; margin-bottom:10px; }
+    .disc-search-input {
+      flex:1; min-width:0; background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:12px 14px; color:var(--text); font-family:'Barlow',sans-serif;
+      font-size:14px; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none;
+    }
+    .disc-search-input:focus { border-color:var(--accent); }
+    .disc-search-input::placeholder { color:var(--muted); }
+    .disc-search-submit {
+      flex-shrink:0; background:var(--accent); color:var(--bg); border:none; border-radius:10px;
+      padding:0 16px; font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:1.5px; cursor:pointer;
+    }
+    .disc-search-submit:disabled { opacity:.6; cursor:default; }
+    .disc-search-help { font-size:12px; color:var(--muted); margin-bottom:12px; }
+    .disc-search-results {
+      max-height:min(50vh,420px); overflow-y:auto; -webkit-overflow-scrolling:touch;
+      border:1px solid var(--border); border-radius:12px; background:var(--surface);
+    }
+    .disc-search-empty { padding:28px 18px; text-align:center; color:var(--muted); font-size:13px; line-height:1.6; }
+    .disc-result { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:14px 16px; border-bottom:1px solid var(--border); }
+    .disc-result:last-child { border-bottom:none; }
+    .disc-result-main { min-width:0; flex:1; }
+    .disc-result-brand { font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--accent); margin-bottom:3px; }
+    .disc-result-name { font-size:17px; font-weight:700; line-height:1.2; }
+    .disc-result-meta { font-size:12px; color:var(--muted); margin-top:5px; }
+    .disc-result-flight { font-size:12px; color:var(--text); margin-top:4px; }
+    .disc-add-btn {
+      flex-shrink:0; min-width:74px; background:var(--surface2); border:1px solid var(--border); border-radius:8px;
+      padding:8px 12px; color:var(--text); font-family:'Barlow',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:border-color .2s,color .2s,opacity .2s;
+    }
+    .disc-add-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .disc-add-btn:disabled,
+    .disc-add-btn.added { opacity:.7; cursor:default; border-color:var(--border); color:var(--muted); }
     .ov-bottom { height:20px; }
   </style>
 </head>
@@ -283,10 +321,13 @@
     <div class="ov-section">
       <div class="sec-label" style="margin-bottom:10px">My Bag</div>
       <div id="bagDisplay"></div>
-      <label class="upload-csv-label">
-        📂 Upload DiscMate CSV
-        <input type="file" class="upload-csv-input" accept=".csv" onchange="handleBagUpload(event)">
-      </label>
+      <div class="bag-import-actions">
+        <label class="upload-csv-label">
+          📂 Upload DiscMate CSV
+          <input type="file" class="upload-csv-input" accept=".csv" onchange="handleBagUpload(event)">
+        </label>
+        <button type="button" class="upload-csv-label search-db-btn" onclick="openDiscSearchModal()">🔎 Search Disc Database</button>
+      </div>
     </div>
     <div class="ov-settings">
       <div class="ov-user">Signed in as <strong id="userDisplay">—</strong></div>
@@ -307,6 +348,38 @@
       <button class="picker-close" onclick="closePicker()">✕</button>
     </div>
     <div class="picker-body" id="pickerBody"></div>
+  </div>
+</div>
+
+<!-- DISC SEARCH -->
+<div class="overlay" id="discSearchOverlay" onclick="discSearchBgClose(event)">
+  <div class="ov-sheet disc-search-sheet">
+    <div class="ov-hdr">
+      <div>
+        <div class="ov-title">Search Disc Database</div>
+        <div class="ov-par">DiscIt search import</div>
+      </div>
+      <button class="ov-close" onclick="closeDiscSearchModal()">✕</button>
+    </div>
+    <div class="disc-search-body">
+      <div class="disc-search-controls">
+        <input
+          type="text"
+          class="disc-search-input"
+          id="discSearchInput"
+          placeholder="Search by disc name"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="words"
+          spellcheck="false"
+          oninput="queueDiscSearch()"
+          onkeydown="if(event.key==='Enter')searchDiscDatabase()"
+        >
+        <button type="button" class="disc-search-submit" id="discSearchBtn" onclick="searchDiscDatabase()">Search</button>
+      </div>
+      <div class="disc-search-help">Search DiscIt by disc name, then add matching molds directly to your bag.</div>
+      <div class="disc-search-results" id="discSearchResults"></div>
+    </div>
   </div>
 </div>
 
@@ -397,6 +470,16 @@ let activeLayout = lsg('dgc_layout') || 'short';
 let uname  = lsg('dgc_username');
 let cur    = 0;
 let pickerHoleId = null;
+let discSearchState = { query:'', results:[], loading:false, error:'', searched:false };
+let discSearchDebounceTimer = null;
+let discSearchRequestToken = 0;
+let discSearchAbortController = null;
+let discSearchInFlightQuery = '';
+const discSearchCache = new Map();
+
+const DISC_SEARCH_BUTTON_MIN_CHARS = 2;
+const DISC_SEARCH_AUTO_MIN_CHARS = 3;
+const DISC_SEARCH_DEBOUNCE_MS = 200;
 
 const GAME_PLAN_FIELDS = ['target','intent','avoid','bailout'];
 const GAME_PLAN_TARGET_OPTIONS = [
@@ -700,6 +783,16 @@ function switchLayout(layout) {
 // ═══════════════════════════════════════════════════
 //  BAG UPLOAD & DISPLAY
 // ═══════════════════════════════════════════════════
+function persistBag(discs) {
+  userData.bag = discs;
+  const bagKey = userCacheKey('bag');
+  if (bagKey) lss(bagKey, JSON.stringify(discs));
+  syncUserData();
+  renderBagDisplay();
+  holes().forEach(h => refreshDiscSection(h.id));
+  if (pickerHoleId) renderPickerBody();
+}
+
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   const headers = lines[0].split(',').map(h=>h.trim());
@@ -735,15 +828,225 @@ function handleBagUpload(event) {
   reader.onload = e => {
     const discs = parseCSV(e.target.result);
     if (discs.length===0) { alert('No discs found — make sure this is a DiscMate CSV export.'); return; }
-    userData.bag = discs;
-    const bagKey = userCacheKey('bag');
-    if (bagKey) lss(bagKey, JSON.stringify(discs));
-    syncUserData();
-    renderBagDisplay();
-    holes().forEach(h => refreshDiscSection(h.id));
+    persistBag(discs);
     event.target.value='';
   };
   reader.readAsText(file);
+}
+
+function mapDiscItCategory(category='') {
+  const map = {
+    'Distance Driver':'Distance',
+    'Hybrid Driver':'Fairway',
+    'Control Driver':'Fairway',
+    'Midrange':'Midrange',
+    'Putter':'Putter'
+  };
+  return map[category] || category || '';
+}
+
+function parseFlightNumber(value) {
+  const num = parseFloat(value);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function formatDiscItFlight(disc) {
+  return [disc.speed, disc.glide, disc.turn, disc.fade].map(v => v ?? '—').join(' / ');
+}
+
+function bagHasDiscId(discId) {
+  return (userData.bag||[]).some(d => d.id === discId);
+}
+
+function normalizeDiscSearchQuery(query='') {
+  return query.trim().toLowerCase();
+}
+
+function cancelDiscSearchRequest() {
+  if (discSearchAbortController) discSearchAbortController.abort();
+  discSearchAbortController = null;
+  discSearchInFlightQuery = '';
+}
+
+function convertDiscItDisc(disc) {
+  return {
+    id:           disc.id || `discit-${Date.now()}`,
+    manufacturer: disc.brand || '',
+    name:         disc.name || 'Unknown Disc',
+    type:         mapDiscItCategory(disc.category),
+    plastic:      '',
+    speed:        parseFlightNumber(disc.speed),
+    glide:        parseFlightNumber(disc.glide),
+    turn:         parseFlightNumber(disc.turn),
+    fade:         parseFlightNumber(disc.fade),
+    condition:    '',
+    dnotes:       '',
+    weight:       0,
+  };
+}
+
+function updateDiscSearchControls() {
+  const btn = document.getElementById('discSearchBtn');
+  if (!btn) return;
+  btn.disabled = discSearchState.loading;
+  btn.textContent = discSearchState.loading ? 'Searching…' : 'Search';
+}
+
+function renderDiscSearchResults() {
+  const el = document.getElementById('discSearchResults');
+  if (!el) return;
+  updateDiscSearchControls();
+  if (discSearchState.loading) {
+    el.innerHTML = `<div class="disc-search-empty">Searching DiscIt for “${escapeHTML(discSearchState.query)}”…</div>`;
+    return;
+  }
+  if (discSearchState.error) {
+    el.innerHTML = `<div class="disc-search-empty">${escapeHTML(discSearchState.error)}</div>`;
+    return;
+  }
+  if (!discSearchState.query) {
+    el.innerHTML = '<div class="disc-search-empty">Search for a mold name like Destroyer, Hex, or Judge.</div>';
+    return;
+  }
+  if (!discSearchState.searched && discSearchState.query.length < DISC_SEARCH_BUTTON_MIN_CHARS) {
+    el.innerHTML = `<div class="disc-search-empty">Type at least ${DISC_SEARCH_BUTTON_MIN_CHARS} characters to search DiscIt.</div>`;
+    return;
+  }
+  if (!discSearchState.searched && discSearchState.query.length < DISC_SEARCH_AUTO_MIN_CHARS) {
+    el.innerHTML = `<div class="disc-search-empty">Press Search now, or keep typing for live results at ${DISC_SEARCH_AUTO_MIN_CHARS}+ characters.</div>`;
+    return;
+  }
+  if (!discSearchState.results.length) {
+    el.innerHTML = `<div class="disc-search-empty">No matches found for “${escapeHTML(discSearchState.query)}”. Try a broader name.</div>`;
+    return;
+  }
+
+  el.innerHTML = discSearchState.results.map((disc, index) => {
+    const added = bagHasDiscId(disc.id);
+    return `
+      <div class="disc-result">
+        <div class="disc-result-main">
+          <div class="disc-result-brand">${escapeHTML(disc.brand || 'Unknown Brand')}</div>
+          <div class="disc-result-name">${escapeHTML(disc.name || 'Unnamed Disc')}</div>
+          <div class="disc-result-meta">${escapeHTML(disc.category || 'Unknown Category')}</div>
+          <div class="disc-result-flight">Flight ${escapeHTML(formatDiscItFlight(disc))}</div>
+        </div>
+        <button type="button" class="disc-add-btn${added ? ' added' : ''}" onclick="addDiscItResult(${index})" ${added ? 'disabled' : ''}>${added ? 'Added' : 'Add'}</button>
+      </div>`;
+  }).join('');
+}
+
+function openDiscSearchModal() {
+  clearTimeout(discSearchDebounceTimer);
+  cancelDiscSearchRequest();
+  discSearchRequestToken++;
+  discSearchState = { query:'', results:[], loading:false, error:'', searched:false };
+  document.getElementById('discSearchOverlay').classList.add('open');
+  document.getElementById('discSearchInput').value = '';
+  renderDiscSearchResults();
+  setTimeout(() => document.getElementById('discSearchInput')?.focus(), 50);
+}
+
+function closeDiscSearchModal() {
+  clearTimeout(discSearchDebounceTimer);
+  cancelDiscSearchRequest();
+  discSearchRequestToken++;
+  document.getElementById('discSearchOverlay').classList.remove('open');
+}
+
+function discSearchBgClose(e) {
+  if (e.target === document.getElementById('discSearchOverlay')) closeDiscSearchModal();
+}
+
+function queueDiscSearch() {
+  clearTimeout(discSearchDebounceTimer);
+  const input = document.getElementById('discSearchInput');
+  if (!input) return;
+  const query = input.value.trim();
+  discSearchState = { query, results:[], loading:false, error:'', searched:false };
+  if (!query || query.length < DISC_SEARCH_AUTO_MIN_CHARS) {
+    cancelDiscSearchRequest();
+    discSearchRequestToken++;
+  }
+  renderDiscSearchResults();
+  if (!query || query.length < DISC_SEARCH_AUTO_MIN_CHARS) return;
+  discSearchDebounceTimer = setTimeout(() => executeDiscSearch(query), DISC_SEARCH_DEBOUNCE_MS);
+}
+
+function searchDiscDatabase() {
+  clearTimeout(discSearchDebounceTimer);
+  const input = document.getElementById('discSearchInput');
+  if (!input) return;
+  const query = input.value.trim();
+  discSearchState = { query, results:[], loading:false, error:'', searched:false };
+  if (!query || query.length < DISC_SEARCH_BUTTON_MIN_CHARS) {
+    cancelDiscSearchRequest();
+    discSearchRequestToken++;
+  }
+  renderDiscSearchResults();
+  if (!query || query.length < DISC_SEARCH_BUTTON_MIN_CHARS) {
+    input.focus();
+    return;
+  }
+  executeDiscSearch(query);
+}
+
+async function executeDiscSearch(query) {
+  const normalizedQuery = normalizeDiscSearchQuery(query);
+  if (!normalizedQuery) return;
+  if (discSearchInFlightQuery === normalizedQuery && discSearchAbortController) {
+    discSearchState = { query, results:[], loading:true, error:'', searched:true };
+    renderDiscSearchResults();
+    return;
+  }
+
+  const requestToken = ++discSearchRequestToken;
+  if (discSearchCache.has(normalizedQuery)) {
+    cancelDiscSearchRequest();
+    discSearchState = {
+      query,
+      results: discSearchCache.get(normalizedQuery),
+      loading:false,
+      error:'',
+      searched:true
+    };
+    renderDiscSearchResults();
+    return;
+  }
+
+  cancelDiscSearchRequest();
+  const controller = new AbortController();
+  discSearchAbortController = controller;
+  discSearchInFlightQuery = normalizedQuery;
+  discSearchState = { query, results:[], loading:true, error:'', searched:true };
+  renderDiscSearchResults();
+  try {
+    const r = await fetch(`https://discit-api.fly.dev/disc?name=${encodeURIComponent(query)}`, { signal: controller.signal });
+    if (!r.ok) throw new Error('search');
+    const data = await r.json();
+    if (requestToken !== discSearchRequestToken) return;
+    discSearchState.results = Array.isArray(data) ? data : [];
+    discSearchCache.set(normalizedQuery, discSearchState.results);
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    if (requestToken !== discSearchRequestToken) return;
+    discSearchState.error = 'Could not reach DiscIt right now. Please try again in a moment.';
+  } finally {
+    if (discSearchAbortController === controller) {
+      discSearchAbortController = null;
+      discSearchInFlightQuery = '';
+    }
+    if (requestToken !== discSearchRequestToken) return;
+    discSearchState.loading = false;
+    renderDiscSearchResults();
+  }
+}
+
+function addDiscItResult(index) {
+  const disc = discSearchState.results[index];
+  if (!disc || bagHasDiscId(disc.id)) return;
+  persistBag([...(userData.bag||[]), convertDiscItDisc(disc)]);
+  renderDiscSearchResults();
 }
 
 function renderBagDisplay() {
@@ -751,7 +1054,7 @@ function renderBagDisplay() {
   if (!el) return;
   const bag = userData.bag||[];
   if (bag.length===0) {
-    el.innerHTML='<p style="font-size:13px;color:var(--muted);margin-bottom:12px">No bag loaded. Upload your DiscMate CSV export below.</p>';
+    el.innerHTML='<p style="font-size:13px;color:var(--muted);margin-bottom:12px">No bag loaded yet. Upload your DiscMate CSV or search DiscIt below.</p>';
     return;
   }
   const c={Distance:0,Fairway:0,Midrange:0,Putter:0};
@@ -762,7 +1065,7 @@ function renderBagDisplay() {
     c.Midrange ? `<span class="bag-pill gm">${c.Midrange} Midrange</span>`:'',
     c.Putter   ? `<span class="bag-pill gp">${c.Putter} Putter</span>`:'',
   ].filter(Boolean).join('');
-  el.innerHTML=`<div class="bag-counts">${pills}</div><p style="font-size:11px;color:var(--muted);margin-bottom:12px">${bag.length} discs loaded — re-upload CSV to update</p>`;
+  el.innerHTML=`<div class="bag-counts">${pills}</div><p style="font-size:11px;color:var(--muted);margin-bottom:12px">${bag.length} discs loaded — re-upload CSV or search DiscIt to update</p>`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1002,6 +1305,11 @@ document.getElementById('main').addEventListener('touchend',e=>{
   if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.6)navigate(dx<0?1:-1);
 },{passive:true});
 document.addEventListener('keydown',e=>{
+  if (e.key==='Escape') {
+    if (document.getElementById('discSearchOverlay').classList.contains('open')) { closeDiscSearchModal(); return; }
+    if (document.getElementById('pickerOverlay').classList.contains('open')) { closePicker(); return; }
+    if (document.getElementById('overlay').classList.contains('open')) { closeOverview(); return; }
+  }
   if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);
   if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  navigate(-1);
 });
