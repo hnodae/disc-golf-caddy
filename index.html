@@ -193,6 +193,11 @@
     .ov-inf  { font-size:11px; color:var(--muted); margin-top:2px; }
     .ov-section  { padding:16px 18px; border-top:1px solid var(--border); }
     .gen-box { background:var(--surface); border-radius:10px; padding:14px 16px; font-size:13px; line-height:1.65; color:var(--text); }
+    .summary-list { display:flex; flex-direction:column; gap:8px; }
+    .summary-row { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .summary-key { color:var(--muted); font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; flex-shrink:0; }
+    .summary-val { text-align:right; }
+    .summary-val.missing { font-size:12px; line-height:1.5; }
     .ov-settings { padding:14px 18px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
     .ov-user { font-size:13px; color:var(--muted); }
     .ov-user strong { color:var(--accent); }
@@ -309,6 +314,10 @@
       <button class="ov-close" onclick="closeOverview()">✕</button>
     </div>
     <div class="ov-grid" id="ovGrid"></div>
+    <div class="ov-section">
+      <div class="sec-label" style="margin-bottom:10px">Game Plan Summary</div>
+      <div class="gen-box" id="gamePlanSummary"></div>
+    </div>
     <div class="ov-section">
       <div class="sec-label" style="margin-bottom:10px">General Course Rules</div>
       <div class="gen-box">
@@ -722,6 +731,7 @@ function queueGamePlanSave(id, field, val) {
   userData.gamePlan[activeLayout][id] = plan;
   const key = userCacheKey('gameplan', activeLayout, id);
   if (key) lss(key, JSON.stringify(plan));
+  renderGamePlanSummary();
   queueSync();
 }
 
@@ -762,6 +772,52 @@ function refreshGamePlanFields(holeId) {
     const input = document.getElementById(`gp-${field}-${holeId}`);
     if (input && input.value !== plan[field]) input.value = plan[field];
   });
+}
+function hasGamePlanValue(value) {
+  return typeof value === 'string' && value.trim() !== '';
+}
+function getActiveLayoutGamePlanSummary() {
+  const layoutHoles = holes();
+  const plans = userData.gamePlan?.[activeLayout] || {};
+  const summary = {
+    totalHoles: layoutHoles.length,
+    plannedHoles: 0,
+    aimPointsSet: 0,
+    attackCount: 0,
+    smartCount: 0,
+    safeCount: 0,
+    missingPlans: [],
+  };
+
+  layoutHoles.forEach(hole => {
+    const plan = normalizeGamePlanEntry(plans[hole.id]);
+    const hasPlan = GAME_PLAN_FIELDS.some(field => hasGamePlanValue(plan[field]));
+    if (hasPlan) summary.plannedHoles++;
+    else summary.missingPlans.push(hole.id);
+
+    if (hasGamePlanValue(plan.target)) summary.aimPointsSet++;
+    if (plan.intent === 'Attack') summary.attackCount++;
+    if (plan.intent === 'Smart')  summary.smartCount++;
+    if (plan.intent === 'Safe')   summary.safeCount++;
+  });
+
+  return summary;
+}
+function renderGamePlanSummary() {
+  const el = document.getElementById('gamePlanSummary');
+  if (!el) return;
+  const summary = getActiveLayoutGamePlanSummary();
+  const missingPlans = summary.missingPlans.length ? summary.missingPlans.join(', ') : 'None';
+
+  el.innerHTML = `
+    <div class="summary-list">
+      <div class="summary-row"><span class="summary-key">Planned Holes</span><span class="summary-val">${summary.plannedHoles} / ${summary.totalHoles}</span></div>
+      <div class="summary-row"><span class="summary-key">Aim Points Set</span><span class="summary-val">${summary.aimPointsSet}</span></div>
+      <div class="summary-row"><span class="summary-key">Attack Count</span><span class="summary-val">${summary.attackCount}</span></div>
+      <div class="summary-row"><span class="summary-key">Smart Count</span><span class="summary-val">${summary.smartCount}</span></div>
+      <div class="summary-row"><span class="summary-key">Safe Count</span><span class="summary-val">${summary.safeCount}</span></div>
+      <div class="summary-row"><span class="summary-key">Missing Plans</span><span class="summary-val missing">${escapeHTML(missingPlans)}</span></div>
+    </div>`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1203,6 +1259,7 @@ function build() {
   document.getElementById('ltShort').classList.toggle('active',activeLayout==='short');
   document.getElementById('ltBack') .classList.toggle('active',activeLayout==='back');
   renderBagDisplay();
+  renderGamePlanSummary();
 
   layoutHoles.forEach((h,i)=>{
     const card=document.createElement('div');
@@ -1291,7 +1348,7 @@ function refreshNav(){
 // ═══════════════════════════════════════════════════
 //  OVERVIEW
 // ═══════════════════════════════════════════════════
-function openOverview()  {document.getElementById('overlay').classList.add('open'); renderBagDisplay();}
+function openOverview()  {document.getElementById('overlay').classList.add('open'); renderBagDisplay(); renderGamePlanSummary();}
 function closeOverview() {document.getElementById('overlay').classList.remove('open');}
 function bgClose(e)      {if(e.target===document.getElementById('overlay'))closeOverview();}
 
@@ -1337,6 +1394,7 @@ if (uname) {
     // Refresh disc sections
     holes().forEach(h=>refreshDiscSection(h.id));
     renderBagDisplay();
+    renderGamePlanSummary();
     cacheLocally();
   }).catch(()=>{});
 } else {
