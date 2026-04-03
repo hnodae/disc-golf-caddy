@@ -703,6 +703,37 @@ function loadPreRoundState() {
 function savePreRoundState() {
   lss(preRoundCacheKey(), JSON.stringify(preRound));
 }
+
+// ═══════════════════════════════════════════════════
+//  RESUME / RESUME PERSISTENCE
+// ═══════════════════════════════════════════════════
+function resumeCacheKey() {
+  return userCacheKey('resume') || 'dgc_guest_resume';
+}
+function saveResumeState() {
+  const key = resumeCacheKey();
+  const payload = { cur, activeLayout, roundMode };
+  lss(key, JSON.stringify(payload));
+}
+function loadResumeState() {
+  const key = resumeCacheKey();
+  const cached = lsg(key);
+  if (!cached) return null;
+  try {
+    const raw = JSON.parse(cached);
+    if (raw && typeof raw === 'object') {
+      if (raw.activeLayout === 'short' || raw.activeLayout === 'back') activeLayout = raw.activeLayout;
+      if (typeof raw.roundMode === 'boolean') roundMode = raw.roundMode;
+      if (typeof raw.cur === 'number' && Number.isFinite(raw.cur)) {
+        const max = LAYOUTS[activeLayout].holes.length - 1;
+        if (raw.cur >= 0 && raw.cur <= max) cur = Math.min(raw.cur, max);
+      }
+    }
+    return raw;
+  } catch (e) {
+    return null;
+  }
+}
 function updatePreRoundField(field, value) {
   if (!(field in preRound)) return;
   preRound[field] = value;
@@ -816,12 +847,17 @@ async function handleLogin() {
     uname = name;
     roundMode = false;
     preRound = loadPreRoundState();
+    const resumed = loadResumeState();
     cacheLocally();
     lss('dgc_username', name);
     closeLogin();
     closeRoundSetup();
     document.getElementById('userDisplay').textContent = uname;
     build();
+    if (resumed && typeof resumed.cur === 'number') {
+      const hole = holes()[cur];
+      if (hole) flashSave(`Resumed on Hole ${hole.id}`);
+    }
     fetchWind();
   } catch(e) {
     setLS('Connection failed — check internet and try again.', true);
@@ -1113,12 +1149,14 @@ function enterRoundMode() {
   savePreRoundState();
   closeRoundSetup();
   updateRoundEntryPoint();
+  saveResumeState();
   build();
 }
 function exitRoundMode() {
   if (!roundMode) return;
   roundMode = false;
   updateRoundEntryPoint();
+  saveResumeState();
   build();
 }
 function handleRoundToggle() {
@@ -1139,6 +1177,7 @@ function switchLayout(layout) {
   document.getElementById('dots').innerHTML='';
   document.getElementById('ovGrid').innerHTML='';
   cur=0;
+  saveResumeState();
   build();
   refreshRoundSnapshotIfOpen();
 }
@@ -1669,6 +1708,7 @@ function go(idx){
   document.getElementById('dot-'+cur)?.scrollIntoView({inline:'center',behavior:'smooth'});
   document.getElementById('main').scrollTop=0;
   refreshNav();
+  saveResumeState();
 }
 function navigate(dir){const n=cur+dir;if(n>=0&&n<holes().length)go(n);}
 function refreshNav(){
@@ -1709,8 +1749,14 @@ document.addEventListener('keydown',e=>{
 if (uname) {
   loadFromCache();
   preRound = loadPreRoundState();
+  // Restore resume state (cur, layout, round mode) if present
+  const resumed = loadResumeState();
   build();
   fetchWind();
+  if (resumed && typeof resumed.cur === 'number') {
+    const hole = holes()[cur];
+    if (hole) flashSave(`Resumed on Hole ${hole.id}`);
+  }
   // Background sync from Firebase
   fbRead(`users/${uname}`).then(raw=>{
     if(!raw) return;
