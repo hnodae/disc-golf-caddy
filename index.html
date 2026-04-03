@@ -101,6 +101,13 @@
     .notes-ta { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-family:'Barlow',sans-serif; font-size:14px; line-height:1.6; resize:vertical; outline:none; min-height:90px; transition:border-color .2s; }
     .notes-ta:focus { border-color:var(--accent); }
     .notes-ta::placeholder { color:var(--muted); }
+    .gp-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .gp-field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+    .gp-field.full { grid-column:1 / -1; }
+    .gp-label { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+    .gp-input { width:100%; min-width:0; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 12px; color:var(--text); font-family:'Barlow',sans-serif; font-size:14px; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none; }
+    .gp-input:focus { border-color:var(--accent); }
+    .gp-input::placeholder { color:var(--muted); }
     .save-status { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); margin-top:5px; opacity:0; transition:opacity .3s; min-height:14px; }
     .save-status.show { opacity:1; }
     .spacer { height:18px; }
@@ -391,27 +398,93 @@ let uname  = lsg('dgc_username');
 let cur    = 0;
 let pickerHoleId = null;
 
-let userData = {
-  notes: { short:{}, back:{} },
-  tags:  { short:{}, back:{} },
-  bag:   []
-};
+const GAME_PLAN_FIELDS = ['target','intent','avoid','bailout'];
+const GAME_PLAN_TARGET_OPTIONS = [
+  { value:'', label:'Select aim point' },
+  { value:'Green', label:'Green' },
+  { value:'Landing Zone', label:'Landing Zone' },
+  { value:'Center Gap', label:'Center Gap' },
+  { value:'Left Side', label:'Left Side' },
+  { value:'Right Side', label:'Right Side' },
+];
+const GAME_PLAN_INTENT_OPTIONS = [
+  { value:'', label:'Select intent' },
+  { value:'Attack', label:'Attack' },
+  { value:'Smart',  label:'Smart' },
+  { value:'Safe',   label:'Safe' },
+];
+
+function createLayoutBucket() { return { short:{}, back:{} }; }
+function createEmptyGamePlan() { return { target:'', intent:'', avoid:'', bailout:'' }; }
+function createEmptyUserData() {
+  return {
+    notes:    createLayoutBucket(),
+    gamePlan: createLayoutBucket(),
+    tags:     createLayoutBucket(),
+    bag:      []
+  };
+}
+function escapeHTML(value='') {
+  return String(value)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function normalizeLayoutBucket(bucket) {
+  return {
+    short: bucket?.short && typeof bucket.short === 'object' ? bucket.short : {},
+    back:  bucket?.back  && typeof bucket.back  === 'object' ? bucket.back  : {},
+  };
+}
+function normalizeGamePlanEntry(plan) {
+  const normalized = createEmptyGamePlan();
+  if (!plan || typeof plan !== 'object') return normalized;
+  GAME_PLAN_FIELDS.forEach(field => {
+    normalized[field] = typeof plan[field] === 'string' ? plan[field] : '';
+  });
+  return normalized;
+}
+function normalizeGamePlanBucket(bucket) {
+  const normalized = createLayoutBucket();
+  ['short','back'].forEach(layout => {
+    const plans = bucket?.[layout];
+    if (!plans || typeof plans !== 'object') return;
+    Object.entries(plans).forEach(([holeId, plan]) => {
+      normalized[layout][holeId] = normalizeGamePlanEntry(plan);
+    });
+  });
+  return normalized;
+}
+
+let userData = createEmptyUserData();
 
 function holes() { return LAYOUTS[activeLayout].holes; }
 function lsg(k)  { return localStorage.getItem(k); }
 function lss(k,v){ localStorage.setItem(k,v); }
 function lsr(k)  { localStorage.removeItem(k); }
+function userCacheKey(type, ...parts) {
+  if (!uname) return null;
+  return ['dgc', uname, type, ...parts].join('_');
+}
 
 function normalizeData(raw) {
-  if (!raw) return { notes:{short:{},back:{}}, tags:{short:{},back:{}}, bag:[] };
+  if (!raw) return createEmptyUserData();
   // Handle previous version where notes were at root level
   if (raw.short !== undefined || raw.back !== undefined) {
-    return { notes:{short:raw.short||{},back:raw.back||{}}, tags:{short:{},back:{}}, bag:[] };
+    const legacy = createEmptyUserData();
+    legacy.notes = {
+      short: raw.short && typeof raw.short === 'object' ? raw.short : {},
+      back:  raw.back  && typeof raw.back  === 'object' ? raw.back  : {}
+    };
+    return legacy;
   }
   return {
-    notes: raw.notes || { short:{}, back:{} },
-    tags:  raw.tags  || { short:{}, back:{} },
-    bag:   raw.bag   || []
+    notes:    normalizeLayoutBucket(raw.notes),
+    gamePlan: normalizeGamePlanBucket(raw.gamePlan),
+    tags:     normalizeLayoutBucket(raw.tags),
+    bag:      Array.isArray(raw.bag) ? raw.bag : []
   };
 }
 
@@ -419,19 +492,40 @@ function normalizeData(raw) {
 //  CACHE
 // ═══════════════════════════════════════════════════
 function cacheLocally() {
-  Object.entries(userData.notes.short||{}).forEach(([k,v])=>lss('dgc_note_short_'+k,v));
-  Object.entries(userData.notes.back ||{}).forEach(([k,v])=>lss('dgc_note_back_'+k,v));
-  if (userData.bag?.length > 0) lss('dgc_bag', JSON.stringify(userData.bag));
+  ['short','back'].forEach(layout => {
+    Object.entries(userData.notes[layout]||{}).forEach(([holeId, val]) => {
+      const key = userCacheKey('note', layout, holeId);
+      if (key) lss(key, val);
+    });
+    Object.entries(userData.gamePlan?.[layout]||{}).forEach(([holeId, val]) => {
+      const key = userCacheKey('gameplan', layout, holeId);
+      if (key) lss(key, JSON.stringify(normalizeGamePlanEntry(val)));
+    });
+  });
+  if (userData.bag?.length > 0) {
+    const bagKey = userCacheKey('bag');
+    if (bagKey) lss(bagKey, JSON.stringify(userData.bag));
+  }
 }
 
 function loadFromCache() {
   ['short','back'].forEach(layout => {
     LAYOUTS[layout].holes.forEach(h => {
-      const c = lsg('dgc_note_'+layout+'_'+h.id);
+      const noteKey = userCacheKey('note', layout, h.id);
+      const c = noteKey ? lsg(noteKey) : null;
       if (c) { if(!userData.notes[layout]) userData.notes[layout]={}; userData.notes[layout][h.id]=c; }
+      const gamePlanKey = userCacheKey('gameplan', layout, h.id);
+      const gp = gamePlanKey ? lsg(gamePlanKey) : null;
+      if (gp) {
+        try {
+          if(!userData.gamePlan[layout]) userData.gamePlan[layout]={};
+          userData.gamePlan[layout][h.id] = normalizeGamePlanEntry(JSON.parse(gp));
+        } catch(e) {}
+      }
     });
   });
-  const b = lsg('dgc_bag');
+  const bagKey = userCacheKey('bag');
+  const b = bagKey ? lsg(bagKey) : null;
   if (b) try { userData.bag = JSON.parse(b); } catch(e){}
 }
 
@@ -451,10 +545,13 @@ async function syncUserData() {
 function queueSync(delay=1400) { clearTimeout(saveTimer); saveTimer = setTimeout(syncUserData, delay); }
 
 function flashSave(msg) {
-  const el = document.querySelector('.card.active .save-status');
-  if (!el) return;
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2500);
+  const els = document.querySelectorAll('.card.active .save-status');
+  if (!els.length) return;
+  els.forEach(el => {
+    el.textContent = msg;
+    el.classList.add('show');
+  });
+  setTimeout(() => els.forEach(el => el.classList.remove('show')), 2500);
 }
 
 // ═══════════════════════════════════════════════════
@@ -473,11 +570,11 @@ async function handleLogin() {
       userData = normalizeData(raw);
       setLS(`Welcome back, ${name}!`);
     } else {
-      userData = { notes:{short:{},back:{}}, tags:{short:{},back:{}}, bag:[] };
+      userData = createEmptyUserData();
       await fbWrite(`users/${name}`, userData);
     }
-    cacheLocally();
     uname = name;
+    cacheLocally();
     lss('dgc_username', name);
     closeLogin();
     document.getElementById('userDisplay').textContent = uname;
@@ -497,7 +594,7 @@ function switchUser() {
   closeOverview();
   lsr('dgc_username');
   uname=null;
-  userData={ notes:{short:{},back:{}}, tags:{short:{},back:{}}, bag:[] };
+  userData=createEmptyUserData();
   document.getElementById('main').innerHTML='';
   document.getElementById('dots').innerHTML='';
   document.getElementById('ovGrid').innerHTML='';
@@ -510,13 +607,78 @@ function switchUser() {
 //  NOTES
 // ═══════════════════════════════════════════════════
 function getNote(id) {
-  return userData.notes[activeLayout]?.[id] ?? lsg('dgc_note_'+activeLayout+'_'+id) ?? '';
+  const key = userCacheKey('note', activeLayout, id);
+  return userData.notes[activeLayout]?.[id] ?? (key ? lsg(key) : null) ?? '';
 }
 function queueNoteSave(id, val) {
   if (!userData.notes[activeLayout]) userData.notes[activeLayout]={};
   userData.notes[activeLayout][id] = val;
-  lss('dgc_note_'+activeLayout+'_'+id, val);
+  const key = userCacheKey('note', activeLayout, id);
+  if (key) lss(key, val);
   queueSync();
+}
+
+function getGamePlan(id) {
+  const plan = userData.gamePlan?.[activeLayout]?.[id];
+  if (plan) return normalizeGamePlanEntry(plan);
+  const key = userCacheKey('gameplan', activeLayout, id);
+  const cached = key ? lsg(key) : null;
+  if (!cached) return createEmptyGamePlan();
+  try {
+    return normalizeGamePlanEntry(JSON.parse(cached));
+  } catch(e) {
+    return createEmptyGamePlan();
+  }
+}
+function queueGamePlanSave(id, field, val) {
+  if (!GAME_PLAN_FIELDS.includes(field)) return;
+  if (!userData.gamePlan) userData.gamePlan = createLayoutBucket();
+  if (!userData.gamePlan[activeLayout]) userData.gamePlan[activeLayout] = {};
+  const plan = normalizeGamePlanEntry(userData.gamePlan[activeLayout][id]);
+  plan[field] = val;
+  userData.gamePlan[activeLayout][id] = plan;
+  const key = userCacheKey('gameplan', activeLayout, id);
+  if (key) lss(key, JSON.stringify(plan));
+  queueSync();
+}
+
+function renderSelectOptions(options, selectedValue) {
+  return options.map(option => (
+    `<option value="${escapeHTML(option.value)}"${option.value===selectedValue?' selected':''}>${escapeHTML(option.label)}</option>`
+  )).join('');
+}
+function gamePlanSectionHTML(holeId) {
+  const plan = getGamePlan(holeId);
+  return `
+    <div class="gp-grid">
+      <label class="gp-field">
+        <span class="gp-label">Aim Point</span>
+        <select class="gp-input" id="gp-target-${holeId}" data-gp-field="target">
+          ${renderSelectOptions(GAME_PLAN_TARGET_OPTIONS, plan.target)}
+        </select>
+      </label>
+      <label class="gp-field">
+        <span class="gp-label">Intent</span>
+        <select class="gp-input" id="gp-intent-${holeId}" data-gp-field="intent">
+          ${renderSelectOptions(GAME_PLAN_INTENT_OPTIONS, plan.intent)}
+        </select>
+      </label>
+      <label class="gp-field full">
+        <span class="gp-label">Avoid</span>
+        <input class="gp-input" id="gp-avoid-${holeId}" data-gp-field="avoid" type="text" placeholder="What miss brings the most trouble?" value="${escapeHTML(plan.avoid)}">
+      </label>
+      <label class="gp-field full">
+        <span class="gp-label">Bailout</span>
+        <input class="gp-input" id="gp-bailout-${holeId}" data-gp-field="bailout" type="text" placeholder="Safe miss or fallback landing area" value="${escapeHTML(plan.bailout)}">
+      </label>
+    </div>`;
+}
+function refreshGamePlanFields(holeId) {
+  const plan = getGamePlan(holeId);
+  GAME_PLAN_FIELDS.forEach(field => {
+    const input = document.getElementById(`gp-${field}-${holeId}`);
+    if (input && input.value !== plan[field]) input.value = plan[field];
+  });
 }
 
 // ═══════════════════════════════════════════════════
@@ -574,7 +736,8 @@ function handleBagUpload(event) {
     const discs = parseCSV(e.target.result);
     if (discs.length===0) { alert('No discs found — make sure this is a DiscMate CSV export.'); return; }
     userData.bag = discs;
-    lss('dgc_bag', JSON.stringify(discs));
+    const bagKey = userCacheKey('bag');
+    if (bagKey) lss(bagKey, JSON.stringify(discs));
     syncUserData();
     renderBagDisplay();
     holes().forEach(h => refreshDiscSection(h.id));
@@ -770,14 +933,23 @@ function build() {
         <div id="ds-${h.id}">${discSectionHTML(h.id)}</div>
       </div>
       <div class="section">
+        <div class="sec-label">Game Plan</div>
+        ${gamePlanSectionHTML(h.id)}
+        <div class="save-status"></div>
+      </div>
+      <div class="section">
         <div class="sec-label">My Notes</div>
-        <textarea class="notes-ta" id="ta-${h.id}" placeholder="Line, elevation, wind effect…">${getNote(h.id)}</textarea>
+        <textarea class="notes-ta" id="ta-${h.id}" placeholder="Line, elevation, wind effect…">${escapeHTML(getNote(h.id))}</textarea>
         <div class="save-status"></div>
       </div>
       <div class="spacer"></div>`;
 
     main.appendChild(card);
     card.querySelector('.notes-ta').addEventListener('input',e=>queueNoteSave(h.id,e.target.value));
+    card.querySelectorAll('[data-gp-field]').forEach(input => {
+      const evt = input.tagName === 'SELECT' ? 'change' : 'input';
+      input.addEventListener(evt, e => queueGamePlanSave(h.id, e.target.dataset.gpField, e.target.value));
+    });
 
     const dot=document.createElement('div');
     dot.className=`dot p${h.par}${i===0?' active':''}`;
@@ -852,6 +1024,7 @@ if (uname) {
         const ta=document.getElementById('ta-'+h.id);
         if(ta&&ta.value!==n) ta.value=n;
       }
+      refreshGamePlanFields(h.id);
     });
     // Refresh disc sections
     holes().forEach(h=>refreshDiscSection(h.id));
