@@ -286,6 +286,10 @@
     .bag-import-sample-item { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 9px; min-width:0; }
     .bag-import-sample-label { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
     .bag-import-sample-value { font-size:12px; line-height:1.35; word-break:break-word; }
+    .bag-import-options { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+    .bag-import-option { display:flex; flex-direction:column; gap:5px; }
+    .bag-import-input { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-family:'Barlow',sans-serif; font-size:12px; }
+    .bag-import-toggle { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text); }
     .search-db-btn { appearance:none; }
     .search-db-btn:disabled { opacity:.6; cursor:default; }
     .bag-editor { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
@@ -738,6 +742,22 @@
         <div class="bag-import-card-title">Mapped Sample</div>
         <div class="bag-import-sample" id="bagImportSample"></div>
       </div>
+      <div class="bag-import-card">
+        <div class="bag-import-card-title">Import Options</div>
+        <div class="bag-import-options">
+          <label class="bag-import-option">
+            <span class="bag-editor-label">New Bag Name</span>
+            <input class="bag-import-input" id="bagImportName" type="text" placeholder="Imported Bag">
+          </label>
+          <label class="bag-import-option">
+            <span class="bag-editor-label">After Import</span>
+            <span class="bag-import-toggle">
+              <input type="checkbox" id="bagImportSwitch">
+              Switch to the new bag
+            </span>
+          </label>
+        </div>
+      </div>
       <div class="bag-import-table-wrap">
         <table class="bag-import-table">
           <thead id="bagImportTableHead"></thead>
@@ -745,6 +765,7 @@
         </table>
       </div>
       <div class="bag-import-actions">
+        <button type="button" class="bag-editor-btn primary" onclick="commitBagImport()">Import</button>
         <button type="button" class="bag-editor-btn primary" onclick="closeBagImportPreview()">Close</button>
       </div>
     </div>
@@ -2274,6 +2295,20 @@ function bagImportMappedValue(row, field) {
   return row[idx] ?? '';
 }
 
+function bagImportRowToDisc(row, index=0) {
+  const get = field => String(bagImportMappedValue(row, field) || '').trim();
+  const rawWeight = get('weight');
+  const parsedWeight = Number.parseFloat(rawWeight);
+  return normalizeDisc({
+    id: `disc-${Date.now()}-${index}`,
+    brand: get('brand'),
+    mold: get('mold'),
+    plastic: get('plastic'),
+    weight: Number.isFinite(parsedWeight) ? parsedWeight : 0,
+    notes: get('notes')
+  });
+}
+
 function buildBagImportSelectOptions(selectEl, selectedValue='') {
   if (!selectEl) return;
   const headers = bagImportState.headers || [];
@@ -2305,6 +2340,8 @@ function renderBagImportPreview() {
   const head = document.getElementById('bagImportTableHead');
   const body = document.getElementById('bagImportTableBody');
   const sample = document.getElementById('bagImportSample');
+  const bagNameInput = document.getElementById('bagImportName');
+  const switchInput = document.getElementById('bagImportSwitch');
   const brandMap = document.getElementById('bagImportBrandMap');
   const moldMap = document.getElementById('bagImportMoldMap');
   const plasticMap = document.getElementById('bagImportPlasticMap');
@@ -2328,6 +2365,13 @@ function renderBagImportPreview() {
     : `<tr><td colspan="${Math.max(headers.length, 1)}" class="bag-import-meta">No data rows found.</td></tr>`;
 
   syncBagImportMappingControls();
+  if (bagNameInput && !bagNameInput.value) {
+    const baseName = (bagImportState.fileName || 'Imported Bag').replace(/\.[^.]+$/, '').trim();
+    bagNameInput.value = baseName || 'Imported Bag';
+  }
+  if (switchInput && switchInput.checked !== false) {
+    switchInput.checked = false;
+  }
 
   if (sample) {
     const sampleRow = bagImportState.rows[0] || [];
@@ -2369,6 +2413,13 @@ function handleBagImportSelection(event) {
       rows: parsed.rows,
       mapping: inferBagImportMapping(parsed.headers)
     };
+    const bagNameInput = document.getElementById('bagImportName');
+    if (bagNameInput) {
+      const baseName = file.name.replace(/\.[^.]+$/, '').trim();
+      bagNameInput.value = baseName || 'Imported Bag';
+    }
+    const switchInput = document.getElementById('bagImportSwitch');
+    if (switchInput) switchInput.checked = false;
     renderBagImportPreview();
     event.target.value = '';
   };
@@ -2377,6 +2428,45 @@ function handleBagImportSelection(event) {
 
 function updateBagImportMapping() {
   updateBagImportStateFromInputs();
+}
+
+function commitBagImport() {
+  const bagNameInput = document.getElementById('bagImportName');
+  const switchInput = document.getElementById('bagImportSwitch');
+  const name = (bagNameInput?.value || '').trim() || 'Imported Bag';
+  const rows = Array.isArray(bagImportState.rows) ? bagImportState.rows : [];
+  if (!rows.length) {
+    alert('No rows are loaded for import.');
+    return;
+  }
+
+  const discs = rows.map((row, index) => bagImportRowToDisc(row, index)).filter(Boolean);
+  if (!discs.length) {
+    alert('No importable discs were found.');
+    return;
+  }
+
+  const bagId = nextBagId();
+  userData.bags = userData.bags || {};
+  userData.bags[bagId] = {
+    ...createEmptyBag(bagId, name),
+    discs
+  };
+
+  if (switchInput?.checked) {
+    userData.activeBagId = bagId;
+    activeBag();
+    syncActiveBagFields();
+  } else {
+    activeBag();
+  }
+
+  syncUserData();
+  renderBagDisplay();
+  holes().forEach(h => refreshDiscSection(h.id));
+  if (pickerHoleId) renderPickerBody();
+  refreshRoundSnapshotIfOpen();
+  closeBagImportPreview();
 }
 
 function handleBagUpload(event) {
