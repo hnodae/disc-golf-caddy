@@ -279,6 +279,13 @@
     .bag-import-card { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
     .bag-import-card-title { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
     .bag-import-card-val { font-size:13px; line-height:1.45; color:var(--text); }
+    .bag-import-mapper { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+    .bag-import-map-field { display:flex; flex-direction:column; gap:5px; }
+    .bag-import-select { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-family:'Barlow',sans-serif; font-size:12px; }
+    .bag-import-sample { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:8px; }
+    .bag-import-sample-item { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 9px; min-width:0; }
+    .bag-import-sample-label { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .bag-import-sample-value { font-size:12px; line-height:1.35; word-break:break-word; }
     .search-db-btn { appearance:none; }
     .search-db-btn:disabled { opacity:.6; cursor:default; }
     .bag-editor { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
@@ -701,6 +708,35 @@
       <div class="bag-import-card">
         <div class="bag-import-card-title">Detected Columns</div>
         <div class="bag-import-card-val" id="bagImportMapping">—</div>
+      </div>
+      <div class="bag-import-card">
+        <div class="bag-import-card-title">Field Mapping</div>
+        <div class="bag-import-mapper">
+          <label class="bag-import-map-field">
+            <span class="bag-editor-label">Brand</span>
+            <select class="bag-import-select" id="bagImportBrandMap" onchange="updateBagImportMapping()"></select>
+          </label>
+          <label class="bag-import-map-field">
+            <span class="bag-editor-label">Mold</span>
+            <select class="bag-import-select" id="bagImportMoldMap" onchange="updateBagImportMapping()"></select>
+          </label>
+          <label class="bag-import-map-field">
+            <span class="bag-editor-label">Plastic</span>
+            <select class="bag-import-select" id="bagImportPlasticMap" onchange="updateBagImportMapping()"></select>
+          </label>
+          <label class="bag-import-map-field">
+            <span class="bag-editor-label">Weight</span>
+            <select class="bag-import-select" id="bagImportWeightMap" onchange="updateBagImportMapping()"></select>
+          </label>
+          <label class="bag-import-map-field">
+            <span class="bag-editor-label">Notes</span>
+            <select class="bag-import-select" id="bagImportNotesMap" onchange="updateBagImportMapping()"></select>
+          </label>
+        </div>
+      </div>
+      <div class="bag-import-card">
+        <div class="bag-import-card-title">Mapped Sample</div>
+        <div class="bag-import-sample" id="bagImportSample"></div>
       </div>
       <div class="bag-import-table-wrap">
         <table class="bag-import-table">
@@ -2216,6 +2252,51 @@ function inferBagImportMapping(headers=[]) {
   };
 }
 
+function bagImportMappingFields() {
+  return ['brand', 'mold', 'plastic', 'weight', 'notes'];
+}
+
+function updateBagImportStateFromInputs() {
+  const mapping = {};
+  bagImportMappingFields().forEach(field => {
+    const el = document.getElementById(`bagImport${field[0].toUpperCase()}${field.slice(1)}Map`);
+    mapping[field] = el?.value || '';
+  });
+  bagImportState.mapping = mapping;
+  renderBagImportPreview();
+}
+
+function bagImportMappedValue(row, field) {
+  const column = bagImportState.mapping?.[field];
+  if (!column) return '';
+  const idx = bagImportState.headers.indexOf(column);
+  if (idx === -1) return '';
+  return row[idx] ?? '';
+}
+
+function buildBagImportSelectOptions(selectEl, selectedValue='') {
+  if (!selectEl) return;
+  const headers = bagImportState.headers || [];
+  selectEl.innerHTML = `
+    <option value="">Unmapped</option>
+    ${headers.map(header => `<option value="${escapeHTML(header)}"${header === selectedValue ? ' selected' : ''}>${escapeHTML(header)}</option>`).join('')}
+  `;
+}
+
+function syncBagImportMappingControls() {
+  const fields = {
+    brand: document.getElementById('bagImportBrandMap'),
+    mold: document.getElementById('bagImportMoldMap'),
+    plastic: document.getElementById('bagImportPlasticMap'),
+    weight: document.getElementById('bagImportWeightMap'),
+    notes: document.getElementById('bagImportNotesMap')
+  };
+  Object.entries(fields).forEach(([field, el]) => {
+    buildBagImportSelectOptions(el, bagImportState.mapping?.[field] || '');
+    if (el) el.value = bagImportState.mapping?.[field] || '';
+  });
+}
+
 function renderBagImportPreview() {
   const title = document.getElementById('bagImportSubtitle');
   const fileName = document.getElementById('bagImportFileName');
@@ -2223,6 +2304,12 @@ function renderBagImportPreview() {
   const mapping = document.getElementById('bagImportMapping');
   const head = document.getElementById('bagImportTableHead');
   const body = document.getElementById('bagImportTableBody');
+  const sample = document.getElementById('bagImportSample');
+  const brandMap = document.getElementById('bagImportBrandMap');
+  const moldMap = document.getElementById('bagImportMoldMap');
+  const plasticMap = document.getElementById('bagImportPlasticMap');
+  const weightMap = document.getElementById('bagImportWeightMap');
+  const notesMap = document.getElementById('bagImportNotesMap');
   if (!title || !fileName || !rowCount || !mapping || !head || !body) return;
 
   title.textContent = 'Preview only. No data will be saved yet.';
@@ -2239,6 +2326,22 @@ function renderBagImportPreview() {
   body.innerHTML = previewRows.length
     ? previewRows.map(row => `<tr>${headers.map((_, idx) => `<td>${escapeHTML(row[idx] ?? '')}</td>`).join('')}</tr>`).join('')
     : `<tr><td colspan="${Math.max(headers.length, 1)}" class="bag-import-meta">No data rows found.</td></tr>`;
+
+  syncBagImportMappingControls();
+
+  if (sample) {
+    const sampleRow = bagImportState.rows[0] || [];
+    const sampleFields = bagImportMappingFields().map(field => ({
+      field,
+      value: bagImportMappedValue(sampleRow, field)
+    }));
+    sample.innerHTML = sampleFields.map(item => `
+      <div class="bag-import-sample-item">
+        <div class="bag-import-sample-label">${escapeHTML(item.field)}</div>
+        <div class="bag-import-sample-value">${escapeHTML(item.value || '—')}</div>
+      </div>
+    `).join('');
+  }
 
   document.getElementById('bagImportOverlay')?.classList.add('open');
 }
@@ -2270,6 +2373,10 @@ function handleBagImportSelection(event) {
     event.target.value = '';
   };
   reader.readAsText(file);
+}
+
+function updateBagImportMapping() {
+  updateBagImportStateFromInputs();
 }
 
 function handleBagUpload(event) {
