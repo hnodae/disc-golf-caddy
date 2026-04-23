@@ -2299,7 +2299,7 @@ function bagImportRowToDisc(row, index=0) {
   const get = field => String(bagImportMappedValue(row, field) || '').trim();
   const rawWeight = get('weight');
   const parsedWeight = Number.parseFloat(rawWeight);
-  return normalizeDisc({
+  const disc = normalizeDisc({
     id: `disc-${Date.now()}-${index}`,
     brand: get('brand'),
     mold: get('mold'),
@@ -2307,6 +2307,24 @@ function bagImportRowToDisc(row, index=0) {
     weight: Number.isFinite(parsedWeight) ? parsedWeight : 0,
     notes: get('notes')
   });
+  return bagImportMappingFields().some(field => String(bagImportMappedValue(row, field) || '').trim()) ? disc : null;
+}
+
+function bagImportUsableRowCount(rows=bagImportState.rows) {
+  return (Array.isArray(rows) ? rows : []).reduce((count, row, index) => count + (bagImportRowToDisc(row, index) ? 1 : 0), 0);
+}
+
+function bagImportMappingCount() {
+  return bagImportMappingFields().filter(field => bagImportState.mapping?.[field]).length;
+}
+
+function uniqueBagName(baseName='Imported Bag') {
+  const cleanBase = (baseName || 'Imported Bag').trim() || 'Imported Bag';
+  const names = new Set(Object.values(userData.bags || {}).map(bag => String(bag?.name || '').trim().toLowerCase()).filter(Boolean));
+  if (!names.has(cleanBase.toLowerCase())) return cleanBase;
+  let idx = 2;
+  while (names.has(`${cleanBase} ${idx}`.toLowerCase())) idx += 1;
+  return `${cleanBase} ${idx}`;
 }
 
 function buildBagImportSelectOptions(selectEl, selectedValue='') {
@@ -2360,6 +2378,7 @@ function renderBagImportPreview() {
   head.innerHTML = `<tr>${headers.map(h => `<th>${escapeHTML(h)}</th>`).join('')}</tr>`;
 
   const previewRows = bagImportState.rows.slice(0, 8);
+  const usableRowCount = bagImportUsableRowCount();
   body.innerHTML = previewRows.length
     ? previewRows.map(row => `<tr>${headers.map((_, idx) => `<td>${escapeHTML(row[idx] ?? '')}</td>`).join('')}</tr>`).join('')
     : `<tr><td colspan="${Math.max(headers.length, 1)}" class="bag-import-meta">No data rows found.</td></tr>`;
@@ -2386,6 +2405,7 @@ function renderBagImportPreview() {
       </div>
     `).join('');
   }
+  if (rowCount) rowCount.textContent = `${usableRowCount} usable / ${bagImportState.rows.length}`;
 
   document.getElementById('bagImportOverlay')?.classList.add('open');
 }
@@ -2433,16 +2453,20 @@ function updateBagImportMapping() {
 function commitBagImport() {
   const bagNameInput = document.getElementById('bagImportName');
   const switchInput = document.getElementById('bagImportSwitch');
-  const name = (bagNameInput?.value || '').trim() || 'Imported Bag';
+  const name = uniqueBagName((bagNameInput?.value || '').trim() || 'Imported Bag');
   const rows = Array.isArray(bagImportState.rows) ? bagImportState.rows : [];
   if (!rows.length) {
     alert('No rows are loaded for import.');
     return;
   }
+  if (bagImportMappingCount() === 0) {
+    alert('Map at least one field before importing.');
+    return;
+  }
 
   const discs = rows.map((row, index) => bagImportRowToDisc(row, index)).filter(Boolean);
   if (!discs.length) {
-    alert('No importable discs were found.');
+    alert('No usable rows were found after applying the current mappings.');
     return;
   }
 
