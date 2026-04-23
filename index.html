@@ -1,0 +1,2762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>21st Open · Tom Brown Park</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+    :root {
+      --bg:         #0b1a0b;
+      --surface:    #142014;
+      --surface2:   #1c2e1c;
+      --border:     #273a27;
+      --accent:     #a8ff2e;
+      --accent-dim: rgba(168,255,46,.12);
+      --text:       #dff5df;
+      --muted:      #5e8060;
+      --ob:         #ff7b3a;
+      --mando:      #ffd93d;
+      --note-clr:   #5bb8ff;
+      --par4-clr:   #5bb8ff;
+      --par5-clr:   #ff9f6a;
+      --hdr: 72px;
+      --ftr: 76px;
+    }
+
+    html,body { height:100%; width:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; -webkit-tap-highlight-color:transparent; }
+
+    /* LOGIN */
+    .login-wrap { display:none; position:fixed; inset:0; background:var(--bg); z-index:400; align-items:center; justify-content:center; padding:24px; }
+    .login-wrap.show { display:flex; }
+    .login-card { background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:32px 24px 28px; width:100%; max-width:360px; text-align:center; }
+    .login-icon  { font-size:44px; margin-bottom:14px; }
+    .login-title { font-family:'Bebas Neue',cursive; font-size:30px; letter-spacing:2px; margin-bottom:6px; }
+    .login-sub   { font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:22px; }
+    .login-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:11px; padding:13px 16px; color:var(--text); font-family:'Barlow',sans-serif; font-size:17px; text-align:center; outline:none; margin-bottom:12px; transition:border-color .2s; -webkit-appearance:none; }
+    .login-input:focus { border-color:var(--accent); }
+    .login-input::placeholder { color:var(--muted); }
+    .login-btn { width:100%; background:var(--accent); color:var(--bg); border:none; border-radius:11px; padding:14px; font-family:'Bebas Neue',cursive; font-size:19px; letter-spacing:2px; cursor:pointer; transition:opacity .2s; }
+    .login-btn:disabled { opacity:.4; }
+    .login-status { font-size:12px; color:var(--muted); margin-top:12px; min-height:16px; }
+    .login-status.err { color:var(--ob); }
+
+    /* HEADER */
+    .hdr { position:fixed; inset:0 0 auto 0; height:var(--hdr); background:var(--bg); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:center; z-index:50; padding:0 14px; }
+    .hdr-center { display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .hdr-title  { font-family:'Bebas Neue',cursive; font-size:14px; letter-spacing:2.5px; color:var(--muted); text-align:center; line-height:1; }
+    .hdr-title span { color:var(--accent); }
+    .hdr-actions { position:absolute; right:14px; display:flex; align-items:center; gap:6px; }
+    .layout-toggle { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px; }
+    .lt-btn { background:none; border:none; color:var(--muted); font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:3px 12px; border-radius:16px; cursor:pointer; transition:background .15s,color .15s; touch-action:manipulation; }
+    .lt-btn.active { background:var(--accent); color:var(--bg); }
+    .wind-badge { position:absolute; left:14px; display:flex; align-items:center; gap:4px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:5px 10px 5px 8px; cursor:pointer; transition:border-color .2s,opacity .3s; touch-action:manipulation; }
+    .wind-badge:active { border-color:var(--accent); }
+    .wind-badge.loading { opacity:.4; }
+    .wind-arrow { font-size:13px; display:inline-block; color:var(--accent); transition:transform .6s ease; }
+    .wind-spd   { font-family:'Bebas Neue',cursive; font-size:15px; color:var(--text); line-height:1; }
+    .wind-dir   { font-size:10px; font-weight:700; letter-spacing:.5px; color:var(--muted); }
+    .hdr-btn { background:none; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:'Barlow',sans-serif; font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; padding:7px 10px; cursor:pointer; transition:border-color .2s,color .2s,background .2s; white-space:nowrap; }
+    .hdr-btn:hover,.hdr-btn:active { border-color:var(--accent); color:var(--accent); }
+    .hdr-btn.primary { background:var(--accent); border-color:var(--accent); color:var(--bg); }
+    .hdr-btn.round-live { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+    .selector-sheet { max-width:520px; margin:16px auto; }
+    .selector-body { padding:16px 18px 18px; display:flex; flex-direction:column; gap:16px; }
+    .selector-section { display:flex; flex-direction:column; gap:8px; }
+    .selector-list { display:flex; flex-direction:column; gap:8px; }
+    .selector-item {
+      width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px;
+      background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:12px 14px; color:var(--text); font-family:'Barlow',sans-serif;
+      font-size:14px; text-align:left; cursor:pointer;
+    }
+    .selector-item.active { border-color:var(--accent); background:var(--surface2); }
+    .selector-meta { font-size:11px; color:var(--muted); margin-top:3px; }
+    .selector-check { color:var(--accent); font-weight:700; }
+    .editor-sheet { max-width:760px; margin:16px auto; }
+    .editor-body { padding:16px 18px 18px; display:flex; flex-direction:column; gap:14px; }
+    .editor-tools { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .editor-grid { display:grid; grid-template-columns:minmax(0, 1.1fr) minmax(0, .9fr); gap:12px; }
+    .editor-list { display:flex; flex-direction:column; gap:8px; max-height:52vh; overflow:auto; }
+    .editor-item {
+      width:100%; display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+      background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:12px 12px; color:var(--text); font-family:'Barlow',sans-serif;
+      cursor:pointer; text-align:left;
+    }
+    .editor-item.active { border-color:var(--accent); background:var(--surface2); }
+    .editor-item-meta { font-size:11px; color:var(--muted); margin-top:3px; line-height:1.45; }
+    .editor-item-actions { display:flex; gap:6px; flex-shrink:0; }
+    .editor-form { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+    .editor-row { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+    .editor-field { display:flex; flex-direction:column; gap:5px; min-width:0; }
+    .editor-field.full { grid-column:1 / -1; }
+    .editor-label { font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
+    .editor-input, .editor-textarea {
+      width:100%; min-width:0; background:var(--bg); border:1px solid var(--border); border-radius:8px;
+      color:var(--text); font-family:'Barlow',sans-serif; font-size:13px; outline:none; padding:10px 11px;
+    }
+    .editor-textarea { min-height:76px; resize:vertical; line-height:1.45; }
+    .editor-input:focus, .editor-textarea:focus { border-color:var(--accent); }
+    .editor-note { font-size:11px; color:var(--muted); line-height:1.45; }
+    .editor-actions { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+    .editor-save { background:var(--accent); border:1px solid var(--accent); color:var(--bg); border-radius:8px; padding:7px 12px; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+    .editor-delete { background:none; border:1px solid var(--border); color:var(--ob); border-radius:8px; padding:7px 12px; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+
+    /* MAIN */
+    .main { position:fixed; top:var(--hdr); bottom:var(--ftr); left:0; right:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+
+    /* CARDS */
+    .card { display:none; flex-direction:column; min-height:100%; }
+    .card.active { display:flex; }
+    .hero { background:var(--surface); padding:16px 20px 14px; display:flex; align-items:center; gap:18px; border-bottom:2px solid var(--border); }
+    .hero-num  { font-family:'Bebas Neue',cursive; font-size:88px; line-height:.85; color:var(--accent); min-width:72px; text-align:center; }
+    .hero-meta { display:flex; flex-direction:column; gap:5px; }
+    .hero-sub  { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); }
+    .hero-stats { display:flex; align-items:center; gap:14px; }
+    .stat     { display:flex; flex-direction:column; align-items:center; }
+    .stat-val { font-family:'Bebas Neue',cursive; font-size:36px; line-height:1; }
+    .stat-lbl { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+    .divider  { width:1px; height:40px; background:var(--border); }
+    .par3 .par-val { color:var(--accent); }
+    .par4 .par-val { color:var(--par4-clr); }
+    .par5 .par-val { color:var(--par5-clr); }
+    .map-wrap    { background:#050d05; border-bottom:1px solid var(--border); text-align:center; }
+    .map-img     { width:100%; display:block; max-height:56vh; object-fit:contain; }
+    .map-missing { padding:55px 20px; color:var(--muted); font-size:12px; letter-spacing:1px; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; }
+    .map-missing span { font-size:28px; display:block; margin-bottom:8px; }
+    .section   { padding:16px 18px; border-bottom:1px solid var(--border); }
+    .sec-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .rule { display:flex; gap:10px; padding:10px 12px; background:var(--surface); border-radius:8px; margin-bottom:7px; border-left:3px solid transparent; font-size:14px; line-height:1.55; }
+    .rule:last-child { margin-bottom:0; }
+    .rule.ob    { border-left-color:var(--ob); }
+    .rule.mando { border-left-color:var(--mando); }
+    .rule.note  { border-left-color:var(--note-clr); }
+    .rule-tag   { flex-shrink:0; align-self:flex-start; border-radius:4px; padding:2px 7px; font-size:10px; font-weight:700; letter-spacing:1px; margin-top:1px; }
+    .tag-ob    { background:rgba(255,123,58,.15); color:var(--ob);       border:1px solid rgba(255,123,58,.35); }
+    .tag-mando { background:rgba(255,217,61,.15); color:var(--mando);    border:1px solid rgba(255,217,61,.35); }
+    .tag-note  { background:rgba(91,184,255,.15); color:var(--note-clr); border:1px solid rgba(91,184,255,.35); }
+    .no-rules  { font-size:13px; font-style:italic; color:var(--muted); }
+    .notes-ta { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-family:'Barlow',sans-serif; font-size:14px; line-height:1.6; resize:vertical; outline:none; min-height:90px; transition:border-color .2s; }
+    .notes-ta:focus { border-color:var(--accent); }
+    .notes-ta::placeholder { color:var(--muted); }
+    .gp-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .gp-field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+    .gp-field.full { grid-column:1 / -1; }
+    .gp-label { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+    .gp-input { width:100%; min-width:0; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 12px; color:var(--text); font-family:'Barlow',sans-serif; font-size:14px; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none; }
+    .gp-input:focus { border-color:var(--accent); }
+    .gp-input::placeholder { color:var(--muted); }
+    .save-status { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); margin-top:5px; opacity:0; transition:opacity .3s; min-height:14px; }
+    .save-status.show { opacity:1; }
+    .spacer { height:18px; }
+
+    /* ── DISC SELECTION ─────────────────────────── */
+    .disc-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .disc-chip  {
+      display:flex; align-items:center; gap:5px;
+      padding:4px 8px 4px 10px; border-radius:20px;
+      background:var(--surface); border:1px solid var(--border);
+      font-size:12px; font-weight:600;
+    }
+    .disc-chip.td { border-color:var(--ob);       color:var(--ob); }
+    .disc-chip.tf { border-color:var(--mando);     color:var(--mando); }
+    .disc-chip.tm { border-color:var(--note-clr);  color:var(--note-clr); }
+    .disc-chip.tp { border-color:var(--accent);    color:var(--accent); }
+    .chip-x { background:none; border:none; color:inherit; cursor:pointer; font-size:15px; line-height:1; padding:0 0 0 2px; opacity:.7; }
+    .tag-disc-btn {
+      width:100%; background:none; border:1px dashed var(--border);
+      border-radius:8px; padding:8px 14px; color:var(--muted);
+      font-family:'Barlow',sans-serif; font-size:12px; font-weight:600;
+      cursor:pointer; transition:border-color .2s,color .2s; margin-top:2px;
+    }
+    .tag-disc-btn:active { border-color:var(--accent); color:var(--accent); }
+    .no-bag-hint { font-size:12px; color:var(--muted); font-style:italic; cursor:pointer; }
+    .no-bag-hint:active { color:var(--accent); }
+    .no-chips-msg { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:10px; }
+
+    /* ── DISC PICKER ────────────────────────────── */
+    .picker-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:300; }
+    .picker-overlay.open { display:block; }
+    .picker-sheet { position:absolute; bottom:0; left:0; right:0; background:var(--bg); border-radius:18px 18px 0 0; border:1px solid var(--border); border-bottom:none; max-height:82vh; display:flex; flex-direction:column; }
+    .picker-hdr { padding:16px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+    .picker-title { font-family:'Bebas Neue',cursive; font-size:22px; letter-spacing:2px; }
+    .picker-sub   { font-size:12px; color:var(--muted); margin-top:1px; }
+    .picker-close { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:4px 6px; line-height:1; }
+    .picker-body  { overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
+    .disc-group-hdr { padding:12px 18px 6px; font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; background:var(--bg); position:sticky; top:0; }
+    .disc-group-hdr.gd { color:var(--ob); }
+    .disc-group-hdr.gf { color:var(--mando); }
+    .disc-group-hdr.gm { color:var(--note-clr); }
+    .disc-group-hdr.gp { color:var(--accent); }
+    .disc-item { display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .15s; }
+    .disc-item:active,.disc-item.sel { background:var(--surface2); }
+    .disc-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .disc-dot.dd { background:var(--ob); }
+    .disc-dot.df { background:var(--mando); }
+    .disc-dot.dm { background:var(--note-clr); }
+    .disc-dot.dp { background:var(--accent); }
+    .disc-info  { flex:1; min-width:0; }
+    .disc-iname { font-size:15px; font-weight:600; color:var(--text); }
+    .disc-imeta { font-size:11px; color:var(--muted); margin-top:2px; }
+    .disc-inote { font-size:11px; color:var(--muted); font-style:italic; margin-top:1px; }
+    .disc-check { font-size:18px; color:var(--accent); width:22px; text-align:center; flex-shrink:0; }
+
+    /* ── FOOTER ─────────────────────────────────── */
+    .ftr { position:fixed; inset:auto 0 0 0; height:var(--ftr); background:var(--bg); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 10px; gap:8px; z-index:50; }
+    .nav-btn { width:52px; height:52px; flex-shrink:0; background:var(--surface); border:1px solid var(--border); border-radius:12px; color:var(--text); font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s,border-color .15s; touch-action:manipulation; }
+    .nav-btn:active   { background:var(--surface2); border-color:var(--accent); }
+    .nav-btn:disabled { opacity:.28; pointer-events:none; }
+    .dots { flex:1; display:flex; align-items:center; gap:5px; overflow-x:auto; justify-content:center; scrollbar-width:none; padding:4px 0; }
+    .dots::-webkit-scrollbar { display:none; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--border); flex-shrink:0; cursor:pointer; transition:background .2s,transform .2s; }
+    .dot.active { background:var(--accent); transform:scale(1.5); }
+    .dot.p4 { border-radius:3px; }
+    .dot.p5 { border-radius:2px; width:9px; }
+
+    /* ── OVERVIEW ────────────────────────────────── */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:200; overflow-y:auto; }
+    .overlay.open { display:block; }
+    .ov-sheet { background:var(--bg); margin:16px 10px; border-radius:18px; border:1px solid var(--border); overflow:hidden; }
+    .ov-hdr   { padding:16px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .ov-title { font-family:'Bebas Neue',cursive; font-size:22px; letter-spacing:2px; }
+    .ov-par   { font-size:12px; color:var(--muted); font-weight:600; letter-spacing:1px; }
+    .ov-close { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; padding:4px 6px; line-height:1; }
+    .ov-grid  { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); }
+    .ov-cell  { background:var(--surface); padding:12px 6px; text-align:center; cursor:pointer; transition:background .15s; }
+    .ov-cell:active,.ov-cell.cur { background:var(--accent-dim); }
+    .ov-n    { font-family:'Bebas Neue',cursive; font-size:26px; line-height:1; }
+    .ov-n.p3 { color:var(--accent); }
+    .ov-n.p4 { color:var(--par4-clr); }
+    .ov-n.p5 { color:var(--par5-clr); }
+    .ov-inf  { font-size:11px; color:var(--muted); margin-top:2px; }
+    .ov-section  { padding:16px 18px; border-top:1px solid var(--border); }
+    .gen-box { background:var(--surface); border-radius:10px; padding:14px 16px; font-size:13px; line-height:1.65; color:var(--text); }
+    .summary-list { display:flex; flex-direction:column; gap:8px; }
+    .summary-row { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .summary-key { color:var(--muted); font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; flex-shrink:0; }
+    .summary-val { text-align:right; }
+    .summary-val.missing { font-size:12px; line-height:1.5; }
+    .ov-settings { padding:14px 18px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .ov-user { font-size:13px; color:var(--muted); }
+    .ov-user strong { color:var(--accent); }
+    .switch-btn { background:none; border:1px solid var(--border); border-radius:8px; padding:6px 12px; color:var(--muted); font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+    .switch-btn:active { border-color:var(--accent); color:var(--accent); }
+
+    /* Bag section in overview */
+    .bag-counts { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .bag-pill { font-size:11px; font-weight:700; letter-spacing:.5px; padding:3px 10px; border-radius:12px; border:1px solid; }
+    .bag-pill.gd { color:var(--ob);      border-color:var(--ob);      background:rgba(255,123,58,.1); }
+    .bag-pill.gf { color:var(--mando);   border-color:var(--mando);   background:rgba(255,217,61,.1); }
+    .bag-pill.gm { color:var(--note-clr);border-color:var(--note-clr);background:rgba(91,184,255,.1); }
+    .bag-pill.gp { color:var(--accent);  border-color:var(--accent);  background:rgba(168,255,46,.1); }
+    .upload-csv-label {
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--surface2); border:1px solid var(--border);
+      border-radius:8px; padding:8px 14px;
+      color:var(--text); font-family:'Barlow',sans-serif;
+      font-size:12px; font-weight:600; cursor:pointer;
+      transition:border-color .2s;
+    }
+    .upload-csv-label:hover { border-color:var(--accent); }
+    .upload-csv-input { display:none; }
+    .bag-import-actions { display:flex; flex-wrap:wrap; gap:10px; }
+    .search-db-btn { appearance:none; }
+    .search-db-btn:disabled { opacity:.6; cursor:default; }
+    .bag-editor { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+    .bag-editor-form { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+    .bag-editor-field { display:flex; flex-direction:column; gap:5px; min-width:0; }
+    .bag-editor-field.full { grid-column:1 / -1; }
+    .bag-editor-label { font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
+    .bag-editor-input, .bag-editor-textarea {
+      width:100%; min-width:0; background:var(--bg); border:1px solid var(--border); border-radius:8px;
+      color:var(--text); font-family:'Barlow',sans-serif; font-size:13px; outline:none; padding:10px 11px;
+    }
+    .bag-editor-textarea { min-height:70px; resize:vertical; line-height:1.45; }
+    .bag-editor-input:focus, .bag-editor-textarea:focus { border-color:var(--accent); }
+    .bag-editor-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .bag-editor-btn { background:none; border:1px solid var(--border); border-radius:8px; color:var(--text); padding:7px 12px; font-family:'Barlow',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+    .bag-editor-btn.primary { background:var(--accent); border-color:var(--accent); color:var(--bg); }
+    .bag-manager-list { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+    .bag-manager-item { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 12px; }
+    .bag-manager-title { font-size:14px; font-weight:700; line-height:1.3; }
+    .bag-manager-meta { font-size:11px; color:var(--muted); margin-top:3px; line-height:1.45; }
+    .bag-manager-disc { border-top:1px solid var(--border); padding-top:10px; margin-top:10px; }
+    .bag-manager-disc-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+    .bag-disc-item { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 11px; }
+    .bag-disc-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .bag-disc-name { font-size:13px; font-weight:700; line-height:1.35; }
+    .bag-disc-meta { font-size:11px; color:var(--muted); margin-top:2px; line-height:1.4; }
+    .bag-disc-actions { margin-top:8px; }
+    .disc-search-sheet { max-width:720px; margin:16px auto; }
+    .disc-search-body { padding:16px 18px 20px; }
+    .disc-search-controls { display:flex; gap:10px; margin-bottom:10px; }
+    .disc-search-input {
+      flex:1; min-width:0; background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:12px 14px; color:var(--text); font-family:'Barlow',sans-serif;
+      font-size:14px; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none;
+    }
+    .disc-search-input:focus { border-color:var(--accent); }
+    .disc-search-input::placeholder { color:var(--muted); }
+    .disc-search-submit {
+      flex-shrink:0; background:var(--accent); color:var(--bg); border:none; border-radius:10px;
+      padding:0 16px; font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:1.5px; cursor:pointer;
+    }
+    .disc-search-submit:disabled { opacity:.6; cursor:default; }
+    .disc-search-help { font-size:12px; color:var(--muted); margin-bottom:12px; }
+    .disc-search-results {
+      max-height:min(50vh,420px); overflow-y:auto; -webkit-overflow-scrolling:touch;
+      border:1px solid var(--border); border-radius:12px; background:var(--surface);
+    }
+    .disc-search-empty { padding:28px 18px; text-align:center; color:var(--muted); font-size:13px; line-height:1.6; }
+    .disc-result { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:14px 16px; border-bottom:1px solid var(--border); }
+    .disc-result:last-child { border-bottom:none; }
+    .disc-result-main { min-width:0; flex:1; }
+    .disc-result-brand { font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--accent); margin-bottom:3px; }
+    .disc-result-name { font-size:17px; font-weight:700; line-height:1.2; }
+    .disc-result-meta { font-size:12px; color:var(--muted); margin-top:5px; }
+    .disc-result-flight { font-size:12px; color:var(--text); margin-top:4px; }
+    .disc-add-btn {
+      flex-shrink:0; min-width:74px; background:var(--surface2); border:1px solid var(--border); border-radius:8px;
+      padding:8px 12px; color:var(--text); font-family:'Barlow',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:border-color .2s,color .2s,opacity .2s;
+    }
+    .disc-add-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .disc-add-btn:disabled,
+    .disc-add-btn.added { opacity:.7; cursor:default; border-color:var(--border); color:var(--muted); }
+    .round-sheet { max-width:720px; margin:16px auto; }
+    .round-body { padding-bottom:10px; }
+    .round-fields { display:grid; grid-template-columns:1fr; gap:10px; }
+    .round-field { display:flex; flex-direction:column; gap:6px; }
+    .round-input {
+      width:100%; min-width:0; background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; padding:12px 14px; color:var(--text); font-family:'Barlow',sans-serif;
+      font-size:14px; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none;
+    }
+    .round-input:focus { border-color:var(--accent); }
+    .round-input::placeholder { color:var(--muted); }
+    .round-snapshot { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; }
+    .round-snapshot-top { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:12px; }
+    .round-snapshot-hole { font-family:'Bebas Neue',cursive; font-size:30px; letter-spacing:1px; line-height:1; color:var(--accent); }
+    .round-snapshot-meta { font-size:12px; color:var(--muted); margin-top:4px; }
+    .round-snapshot-stat { text-align:right; }
+    .round-snapshot-stat strong { display:block; font-family:'Bebas Neue',cursive; font-size:28px; color:var(--text); line-height:1; }
+    .round-snapshot-grid { display:grid; gap:10px; }
+    .round-snapshot-item { display:flex; flex-direction:column; gap:6px; }
+    .round-snapshot-empty { font-size:12px; color:var(--muted); font-style:italic; line-height:1.5; }
+    .round-actions { display:flex; justify-content:flex-end; gap:10px; padding:0 18px 16px; }
+    .round-start-btn {
+      background:var(--accent); border:1px solid var(--accent); color:var(--bg); border-radius:10px;
+      padding:10px 16px; font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:1.4px; cursor:pointer;
+    }
+    .round-focus-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .round-focus-item { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; min-width:0; }
+    .round-focus-label { font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .round-focus-value { font-size:13px; line-height:1.45; overflow-wrap:anywhere; }
+    .collapsible-section { padding:0; overflow:hidden; }
+    .collapsible-summary {
+      list-style:none; display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:16px 18px; cursor:pointer;
+    }
+    .collapsible-summary::-webkit-details-marker { display:none; }
+    .collapsible-summary .sec-label { margin-bottom:0; }
+    .collapsible-hint { font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
+    .collapsible-section[open] .collapsible-hint { color:var(--accent); }
+    .collapsible-body { padding:0 18px 16px; }
+    .round-plan-empty { font-size:13px; color:var(--muted); font-style:italic; line-height:1.5; }
+    .ov-bottom { height:20px; }
+
+    @media (max-width:640px) {
+      .hdr { padding:0 10px; }
+      .hdr-center { max-width:calc(100% - 186px); }
+      .wind-badge { left:10px; padding:5px 9px 5px 7px; }
+      .hdr-actions { right:10px; gap:5px; }
+      .hdr-btn { font-size:9px; letter-spacing:1px; padding:7px 8px; }
+      .hero { padding:16px 16px 14px; gap:14px; }
+      .section { padding:14px 16px; }
+      .round-actions { padding:0 16px 16px; }
+      .round-focus-grid { grid-template-columns:1fr; }
+      .round-snapshot-top { align-items:center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-icon">🥏</div>
+    <div class="login-title">Caddy Book</div>
+    <div class="login-sub">Enter your name to save and sync<br>your notes across any device</div>
+    <input type="text" class="login-input" id="nameInput"
+      placeholder="your name" maxlength="20"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      onkeydown="if(event.key==='Enter')handleLogin()">
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">Load My Notes</button>
+    <div class="login-status" id="loginStatus"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <button class="wind-badge" id="windBadge" onclick="fetchWind()" title="Tap to refresh">
+    <span class="wind-arrow" id="windArrow">↑</span>
+    <span class="wind-spd"   id="windSpd">--</span>
+    <span class="wind-dir"   id="windDir">mph</span>
+  </button>
+  <div class="hdr-center">
+    <div class="hdr-title"><span id="courseTitle">Tom Brown Park</span> · <span id="layoutTitle">Short Tees</span></div>
+    <div class="layout-toggle">
+      <button class="lt-btn active" id="ltShort" onclick="switchLayout('short')">Short</button>
+      <button class="lt-btn"        id="ltBack"  onclick="switchLayout('back')">Back</button>
+    </div>
+  </div>
+  <div class="hdr-actions">
+    <button class="hdr-btn" onclick="openCourseSelector()">Course</button>
+    <button class="hdr-btn primary" id="roundToggleBtn" onclick="handleRoundToggle()">Start Round</button>
+    <button class="hdr-btn" onclick="openOverview()">All Holes</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main" id="main"></div>
+
+<!-- COURSE SELECTOR -->
+<div class="overlay" id="selectorOverlay" onclick="selectorBgClose(event)">
+  <div class="ov-sheet selector-sheet">
+    <div class="ov-hdr">
+      <div>
+        <div class="ov-title">Course</div>
+        <div class="ov-par">Pick the active course and layout</div>
+      </div>
+      <button class="ov-close" onclick="closeCourseSelector()">✕</button>
+    </div>
+    <div class="selector-body">
+      <div class="selector-section">
+        <div class="sec-label">Course</div>
+        <div class="selector-list" id="selectorCourses"></div>
+      </div>
+      <div class="selector-section">
+        <div class="sec-label">Layout</div>
+        <div class="selector-list" id="selectorLayouts"></div>
+      </div>
+    </div>
+    <div class="ov-settings">
+      <div class="ov-user">Active: <strong id="selectorActive">Tom Brown Park · Short Tees</strong></div>
+      <button class="switch-btn" type="button" onclick="openLayoutEditor()">Edit Layout</button>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT EDITOR -->
+<div class="overlay" id="editorOverlay" onclick="editorBgClose(event)">
+  <div class="ov-sheet editor-sheet">
+    <div class="ov-hdr">
+      <div>
+        <div class="ov-title">Layout Editor</div>
+        <div class="ov-par" id="editorSubtitle">Tom Brown Park · Short Tees</div>
+      </div>
+      <button class="ov-close" onclick="closeLayoutEditor()">✕</button>
+    </div>
+    <div class="editor-body">
+      <div class="editor-tools">
+        <button class="switch-btn" type="button" onclick="newEditorHole()">New Hole</button>
+        <button class="switch-btn" type="button" onclick="resetEditorSelection()">Clear Form</button>
+      </div>
+      <div class="editor-grid">
+        <div class="editor-list" id="editorList"></div>
+        <div class="editor-form">
+          <div class="editor-row">
+            <label class="editor-field">
+              <span class="editor-label">Hole Number</span>
+              <input class="editor-input" id="editorHoleId" type="text" maxlength="8" placeholder="1">
+            </label>
+            <label class="editor-field">
+              <span class="editor-label">Par</span>
+              <input class="editor-input" id="editorPar" type="number" min="1" step="1" placeholder="3">
+            </label>
+            <label class="editor-field">
+              <span class="editor-label">Distance</span>
+              <input class="editor-input" id="editorFeet" type="number" min="0" step="1" placeholder="250">
+            </label>
+          </div>
+          <label class="editor-field">
+            <span class="editor-label">Notes</span>
+            <textarea class="editor-textarea" id="editorNotes" placeholder="Optional layout note"></textarea>
+          </label>
+          <label class="editor-field">
+            <span class="editor-label">Rules Text</span>
+            <textarea class="editor-textarea" id="editorRules" placeholder="OB: ...&#10;MANDO: ...&#10;NOTE: ..."></textarea>
+          </label>
+          <div class="editor-note">Use one rule per line. Prefix with `OB:`, `MANDO:`, or `NOTE:`.</div>
+          <div class="editor-actions">
+            <button class="editor-delete" type="button" onclick="deleteEditorHole()">Delete Hole</button>
+            <button class="editor-save" type="button" onclick="saveEditorHole()">Save Hole</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="ftr">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">←</button>
+  <div class="dots" id="dots"></div>
+  <button class="nav-btn" id="nextBtn" onclick="navigate(1)">→</button>
+</footer>
+
+<!-- OVERVIEW -->
+<div class="overlay" id="overlay" onclick="bgClose(event)">
+  <div class="ov-sheet">
+    <div class="ov-hdr">
+      <div><div class="ov-title" id="ovTitle">All 24 Holes</div><div class="ov-par" id="ovPar"></div></div>
+      <button class="ov-close" onclick="closeOverview()">✕</button>
+    </div>
+    <div class="ov-grid" id="ovGrid"></div>
+    <div class="ov-section">
+      <div class="sec-label" style="margin-bottom:10px">Game Plan Summary</div>
+      <div class="gen-box" id="gamePlanSummary"></div>
+    </div>
+    <div class="ov-section">
+      <div class="sec-label" style="margin-bottom:10px">General Course Rules</div>
+      <div class="gen-box">
+        <strong style="color:var(--ob)">OB:</strong> All roads, water bodies, bridges, pavilions, racquetball/tennis courts, sidewalks, and painted/string lines (unless noted otherwise). White stakes/flags are <em>not</em> OB.<br><br>
+        <strong style="color:var(--note-clr)">Yellow cables</strong> are not OB — take 1 meter relief inside/perpendicular to cable.<br><br>
+        Relief from unmarked casual water per <strong>PDGA Rule 806.03</strong>.
+      </div>
+    </div>
+    <!-- MY BAG -->
+    <div class="ov-section">
+      <div class="sec-label" style="margin-bottom:10px">My Bag</div>
+      <div id="bagDisplay"></div>
+      <div class="bag-editor">
+        <div class="bag-editor-actions">
+          <button type="button" class="bag-editor-btn primary" onclick="createManualBag()">Create Bag</button>
+          <button type="button" class="bag-editor-btn" onclick="clearActiveBag()">Clear Bag</button>
+          <button type="button" class="bag-editor-btn" onclick="openManualDiscEditor()">Add Disc</button>
+        </div>
+        <div class="bag-editor-form">
+          <label class="bag-editor-field">
+            <span class="bag-editor-label">Bag Name</span>
+            <input class="bag-editor-input" id="bagNameInput" type="text" placeholder="My Bag">
+          </label>
+          <label class="bag-editor-field">
+            <span class="bag-editor-label">Active Bag</span>
+            <input class="bag-editor-input" id="activeBagLabel" type="text" readonly>
+          </label>
+        </div>
+        <div class="bag-editor-form" id="discEditorForm" style="display:none">
+          <label class="bag-editor-field">
+            <span class="bag-editor-label">Brand</span>
+            <input class="bag-editor-input" id="discBrandInput" type="text" placeholder="Innova">
+          </label>
+          <label class="bag-editor-field">
+            <span class="bag-editor-label">Mold</span>
+            <input class="bag-editor-input" id="discMoldInput" type="text" placeholder="Destroyer">
+          </label>
+          <label class="bag-editor-field">
+            <span class="bag-editor-label">Plastic</span>
+            <input class="bag-editor-input" id="discPlasticInput" type="text" placeholder="Star">
+          </label>
+          <label class="bag-editor-field">
+            <span class="bag-editor-label">Weight</span>
+            <input class="bag-editor-input" id="discWeightInput" type="number" min="0" step="1" placeholder="175">
+          </label>
+          <label class="bag-editor-field full">
+            <span class="bag-editor-label">Notes</span>
+            <textarea class="bag-editor-textarea" id="discNotesInput" placeholder="Flight, stability, or anything useful"></textarea>
+          </label>
+          <div class="bag-editor-actions">
+            <button type="button" class="bag-editor-btn" onclick="closeManualDiscEditor()">Cancel</button>
+            <button type="button" class="bag-editor-btn primary" id="discSaveBtn" onclick="saveManualDisc()">Save Disc</button>
+          </div>
+        </div>
+        <div class="bag-manager-list" id="bagManagerList"></div>
+      </div>
+    </div>
+    <div class="ov-settings">
+      <div class="ov-user">Signed in as <strong id="userDisplay">—</strong></div>
+      <button class="switch-btn" onclick="switchUser()">Switch User</button>
+    </div>
+    <div class="ov-bottom"></div>
+  </div>
+</div>
+
+<!-- ROUND SETUP -->
+<div class="overlay" id="roundOverlay" onclick="roundBgClose(event)">
+  <div class="ov-sheet round-sheet">
+    <div class="ov-hdr">
+      <div>
+        <div class="ov-title">Start Round</div>
+        <div class="ov-par">Optional pre-round setup for quick in-round reference</div>
+      </div>
+      <button class="ov-close" onclick="closeRoundSetup()">✕</button>
+    </div>
+    <div class="round-body">
+      <div class="ov-section">
+        <div class="sec-label">Pre-Round</div>
+        <div class="round-fields">
+          <label class="round-field">
+            <span class="gp-label">Today's Intent</span>
+            <input
+              type="text"
+              class="round-input"
+              id="roundIntentInput"
+              placeholder="How do you want to play today?"
+              autocomplete="off"
+              oninput="updatePreRoundField('todaysIntent', this.value)"
+            >
+          </label>
+          <label class="round-field">
+            <span class="gp-label">Swing Cue</span>
+            <input
+              type="text"
+              class="round-input"
+              id="roundSwingInput"
+              placeholder="One simple body cue"
+              autocomplete="off"
+              oninput="updatePreRoundField('swingCue', this.value)"
+            >
+          </label>
+          <label class="round-field">
+            <span class="gp-label">Mental Cue</span>
+            <input
+              type="text"
+              class="round-input"
+              id="roundMentalInput"
+              placeholder="One thought to keep you centered"
+              autocomplete="off"
+              oninput="updatePreRoundField('mentalCue', this.value)"
+            >
+          </label>
+        </div>
+      </div>
+      <div class="ov-section">
+        <div class="sec-label">First Hole Snapshot</div>
+        <div id="roundSnapshot"></div>
+      </div>
+      <div class="round-actions">
+        <button class="switch-btn" type="button" onclick="closeRoundSetup()">Back</button>
+        <button class="round-start-btn" type="button" onclick="enterRoundMode()">Enter Round Mode</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DISC PICKER -->
+<div class="picker-overlay" id="pickerOverlay" onclick="pickerBgClose(event)">
+  <div class="picker-sheet">
+    <div class="picker-hdr">
+      <div>
+        <div class="picker-title">Tag a Disc</div>
+        <div class="picker-sub" id="pickerSub"></div>
+      </div>
+      <button class="picker-close" onclick="closePicker()">✕</button>
+    </div>
+    <div class="picker-body" id="pickerBody"></div>
+  </div>
+</div>
+
+<!-- DISC SEARCH -->
+<div class="overlay" id="discSearchOverlay" onclick="discSearchBgClose(event)">
+  <div class="ov-sheet disc-search-sheet">
+    <div class="ov-hdr">
+      <div>
+        <div class="ov-title">Search Disc Database</div>
+        <div class="ov-par">DiscIt search import</div>
+      </div>
+      <button class="ov-close" onclick="closeDiscSearchModal()">✕</button>
+    </div>
+    <div class="disc-search-body">
+      <div class="disc-search-controls">
+        <input
+          type="text"
+          class="disc-search-input"
+          id="discSearchInput"
+          placeholder="Search by disc name"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="words"
+          spellcheck="false"
+          oninput="queueDiscSearch()"
+          onkeydown="if(event.key==='Enter')searchDiscDatabase()"
+        >
+        <button type="button" class="disc-search-submit" id="discSearchBtn" onclick="searchDiscDatabase()">Search</button>
+      </div>
+      <div class="disc-search-help">Search DiscIt by disc name, then add matching molds directly to your bag.</div>
+      <div class="disc-search-results" id="discSearchResults"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  FIREBASE
+// ═══════════════════════════════════════════════════
+const FB = 'https://disc-golf-caddy-2a712-default-rtdb.firebaseio.com';
+
+async function fbRead(path) {
+  const r = await fetch(`${FB}/${path}.json`);
+  if (!r.ok) throw new Error('read');
+  return await r.json();
+}
+async function fbWrite(path, data) {
+  const r = await fetch(`${FB}/${path}.json`, {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('write');
+}
+
+// ═══════════════════════════════════════════════════
+//  HOLE DATA
+// ═══════════════════════════════════════════════════
+const SHORT_HOLES = [
+  {id:'1', par:3,feet:250,img:'images/IMG_6985.PNG',rules:[{t:'ob',s:'Walking path and beyond behind basket; fence on left of fairway and beyond.'}]},
+  {id:'2', par:3,feet:300,img:'images/IMG_6986.PNG',rules:[{t:'ob',s:'Road on the right and beyond. Fencing around parking spots and beyond.'}]},
+  {id:'3', par:3,feet:195,img:'images/IMG_6987.PNG',rules:[{t:'ob',s:'Pavilion on right.'}]},
+  {id:'4', par:3,feet:190,img:'images/IMG_6988.PNG',rules:[{t:'ob',s:'Road on right and beyond.'}]},
+  {id:'5', par:3,feet:280,img:'images/IMG_6989.PNG',rules:[{t:'ob',s:'Walking path and beyond on left. Road and beyond on right. Fencing around parking spots and beyond.'}]},
+  {id:'6', par:3,feet:175,img:'images/IMG_6990.PNG',rules:[{t:'ob',s:'Road on right and beyond.'},{t:'mando',s:'Must pass right of marked tree. If missed, move to DZ +1 penalty stroke.'}]},
+  {id:'7', par:3,feet:205,img:'images/IMG_6991.PNG',rules:[{t:'ob',s:'Road long of basket and beyond.'}]},
+  {id:'8', par:3,feet:270,img:'images/IMG_6992.PNG',rules:[{t:'ob',s:'String/Paint flagged line along right side of fairway and behind basket and beyond.'}]},
+  {id:'9', par:4,feet:410,img:'images/IMG_6993.PNG',rules:[{t:'ob',s:'Creek (surrounded by water), bridges, road (and beyond); white painted/string lines left/right (and beyond), rock ditch before green, and behind basket (and beyond).'},{t:'note',s:'After any tee shot coming to rest OB, the player may choose to proceed to the DZ +1 penalty throw.'}]},
+  {id:'A', par:4,feet:465,img:'images/IMG_6994.PNG',rules:[{t:'ob',s:'String/Painted flagged line left and along creek.'}]},
+  {id:'B', par:4,feet:305,img:'images/IMG_6995.PNG',rules:[{t:'ob',s:'Road and sidewalk and beyond past basket.'}]},
+  {id:'C', par:4,feet:380,img:'images/IMG_6996.PNG',rules:[{t:'ob',s:'Surrounded by water. Paved road past basket and beyond.'},{t:'note',s:'Ditch area to the right of pin — if inside this area, move to DZ +1 penalty throw.'}]},
+  {id:'D', par:3,feet:255,img:'images/IMG_6997.PNG',rules:[{t:'ob',s:'Road in front of pad and left and beyond.'},{t:'mando',s:'Must pass left of marked tree. If missed, move to DZ +1 penalty throw.'}]},
+  {id:'E', par:4,feet:415,img:'images/IMG_6998.PNG',rules:[{t:'ob',s:'Road on left and beyond. Paved road on right of basket and beyond.'}]},
+  {id:'F', par:3,feet:300,img:'images/IMG_6999.PNG',rules:[{t:'ob',s:'Road on left and beyond.'}]},
+  {id:'10',par:4,feet:550,img:'images/IMG_7001.PNG',rules:[{t:'ob',s:'Racquetball, tennis courts, sidewalk (and beyond), and road on right (and beyond).'}]},
+  {id:'11',par:3,feet:240,img:'images/IMG_7002.PNG',rules:[{t:'ob',s:'Road right and beyond.'}]},
+  {id:'12',par:3,feet:215,img:'images/IMG_7003.PNG',rules:[]},
+  {id:'13',par:3,feet:285,img:'images/IMG_7004.PNG',rules:[{t:'ob',s:'Road right and beyond. Road long of basket and beyond.'}]},
+  {id:'14',par:3,feet:260,img:'images/IMG_7005.PNG',rules:[{t:'ob',s:'Racquetball, tennis courts, sidewalk (and beyond), and road on left (and beyond).'}]},
+  {id:'15',par:3,feet:245,img:'images/IMG_7006.PNG',rules:[{t:'ob',s:'Road left and beyond.'}]},
+  {id:'16',par:3,feet:275,img:'images/IMG_7007.PNG',rules:[]},
+  {id:'17',par:3,feet:260,img:'images/IMG_7008.PNG',rules:[{t:'ob',s:'Road right and beyond.'}]},
+  {id:'18',par:5,feet:665,img:'images/IMG_7009.PNG',rules:[{t:'ob',s:'String/Painted flagged line along entire left side of fairway and behind basket and beyond.'}]},
+];
+
+const BACK_HOLES = [
+  {id:'1', par:3,feet:325,img:'images/IMG_7013.PNG',rules:[{t:'ob',s:'Walking path and beyond behind basket; fence on left of fairway and beyond.'},{t:'mando',s:'Must pass left of tree. If missed, move to DZ +1 penalty stroke.'}]},
+  {id:'2', par:3,feet:335,img:'images/IMG_7014.PNG',rules:[{t:'ob',s:'Road on the right and beyond. Fencing around parking spots and beyond.'}]},
+  {id:'3', par:3,feet:245,img:'images/IMG_7015.PNG',rules:[{t:'ob',s:'Pavilion on right.'}]},
+  {id:'4', par:4,feet:325,img:'images/IMG_7016.PNG',rules:[{t:'ob',s:'Road on right and beyond.'}]},
+  {id:'5', par:3,feet:360,img:'images/IMG_7017.PNG',rules:[{t:'ob',s:'Walking path and beyond on left. Road and beyond on right. Fencing around parking spots and beyond.'}]},
+  {id:'6', par:3,feet:220,img:'images/IMG_7018.PNG',rules:[{t:'ob',s:'Road on right and beyond.'},{t:'mando',s:'Must pass right of marked tree. If missed, move to DZ +1 penalty stroke.'}]},
+  {id:'7', par:3,feet:270,img:'images/IMG_7019.PNG',rules:[{t:'ob',s:'Road long of basket and beyond.'}]},
+  {id:'8', par:3,feet:450,img:'images/IMG_7020.PNG',rules:[{t:'ob',s:'String/Paint flagged line along right side of fairway and behind basket and beyond.'},{t:'mando',s:'Must pass left of marked tree. If missed, proceed to Short pad +1 penalty stroke.'}]},
+  {id:'9', par:4,feet:550,img:'images/IMG_7021.PNG',rules:[{t:'ob',s:'Creek (surrounded by water), bridges, road (and beyond); white painted/string lines left/right (and beyond), rock ditch before green.'},{t:'note',s:'After any tee shot coming to rest OB, player may choose to proceed to Short pad +1 penalty throw.'}]},
+  {id:'A', par:4,feet:555,img:'images/IMG_7022.PNG',rules:[{t:'ob',s:'String/Painted flagged line left and along creek.'}]},
+  {id:'B', par:4,feet:430,img:'images/IMG_7023.PNG',rules:[{t:'ob',s:'Road and sidewalk and beyond past basket.'}]},
+  {id:'C', par:4,feet:530,img:'images/IMG_7024.PNG',rules:[{t:'ob',s:'Surrounded by water. Paved road past basket and beyond.'},{t:'note',s:'Ditch area to the right of pin — if inside this area, move to DZ +1 penalty throw.'}]},
+  {id:'D', par:3,feet:330,img:'images/IMG_7025.PNG',rules:[{t:'ob',s:'Road in front of pad and left and beyond.'},{t:'mando',s:'MANDO 1: Must pass right of marked tree. If missed, move to Short pad +1 penalty throw.'},{t:'mando',s:'MANDO 2: Must pass left of marked tree. If missed, move to DZ +1 penalty throw.'}]},
+  {id:'E', par:4,feet:480,img:'images/IMG_7026.PNG',rules:[{t:'ob',s:'Road on left and beyond. Paved road on right of basket and beyond.'}]},
+  {id:'F', par:3,feet:415,img:'images/IMG_7027.PNG',rules:[{t:'ob',s:'Road on left and beyond.'}]},
+  {id:'10',par:4,feet:630,img:'images/IMG_7028.PNG',rules:[{t:'ob',s:'Racquetball, tennis courts, sidewalk (and beyond), and road on right (and beyond). Back pad is an island — all area before and including the road is OB.'},{t:'note',s:'If disc never crossed in-bounds, proceed to Short pad +1 penalty throw.'}]},
+  {id:'11',par:3,feet:315,img:'images/IMG_7029.PNG',rules:[{t:'ob',s:'Road right and beyond.'}]},
+  {id:'12',par:3,feet:315,img:'images/IMG_7030.PNG',rules:[{t:'mando',s:'Must pass left of marked tree. If missed, move to Short pad +1 penalty throw.'}]},
+  {id:'13',par:3,feet:330,img:'images/IMG_7031.PNG',rules:[{t:'ob',s:'Road right and beyond. Road long of basket and beyond.'}]},
+  {id:'14',par:3,feet:325,img:'images/IMG_7032.PNG',rules:[{t:'ob',s:'Racquetball, tennis courts, sidewalk (and beyond), and road in front of pad. Back pad is an island — all area before and including the road is OB.'},{t:'note',s:'If disc never crossed in-bounds, proceed to Short pad +1 penalty throw.'}]},
+  {id:'15',par:3,feet:345,img:'images/IMG_7033.PNG',rules:[{t:'ob',s:'Road left and beyond.'}]},
+  {id:'16',par:3,feet:345,img:'images/IMG_7034.PNG',rules:[{t:'mando',s:'Must pass left of marked tree. If missed, move to Short pad +1 penalty throw.'}]},
+  {id:'17',par:3,feet:335,img:'images/IMG_7035.PNG',rules:[{t:'ob',s:'Road right and beyond.'}]},
+  {id:'18',par:4,feet:805,img:'images/IMG_7036.PNG',rules:[{t:'ob',s:'String/Painted flagged line along entire left side of fairway and behind basket and beyond.'}]},
+];
+
+const TOM_BROWN_HOLE_ORDER = ['1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','10','11','12','13','14','15','16','17','18'];
+
+/**
+ * @typedef {{ id:string, key:string, name:string, holes:Array<object> }} Layout
+ * @typedef {{ id:string, name:string, eventName:string, locationName:string, defaultLayoutId:string, layouts:Record<string, Layout> }} Course
+ */
+
+function compareHoleIds(a, b) {
+  return String(a.id).localeCompare(String(b.id), undefined, { numeric:true, sensitivity:'base' });
+}
+
+function orderHolesByIds(holes, order) {
+  const byId = new Map((Array.isArray(holes) ? holes : []).map(hole => [String(hole.id), hole]));
+  const ordered = [];
+  (Array.isArray(order) ? order : []).forEach(id => {
+    const hole = byId.get(String(id));
+    if (hole) {
+      ordered.push(hole);
+      byId.delete(String(id));
+    }
+  });
+  byId.forEach(hole => ordered.push(hole));
+  return ordered;
+}
+
+function rulesArrayToText(rules=[]) {
+  return (Array.isArray(rules) ? rules : [])
+    .map(rule => {
+      const type = String(rule?.t || 'note').toUpperCase();
+      const text = String(rule?.s || '').trim();
+      return text ? `${type}: ${text}` : '';
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+function rulesTextToArray(text='') {
+  return String(text)
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const match = line.match(/^(OB|MANDO|NOTE)\s*[:\-]\s*(.+)$/i);
+      if (match) return { t: match[1].toLowerCase(), s: match[2].trim() };
+      return { t: 'note', s: line };
+    });
+}
+
+function normalizeHole(hole={}) {
+  const rulesText = typeof hole.rulesText === 'string' ? hole.rulesText : rulesArrayToText(hole.rules);
+  return {
+    id: String(hole.id ?? '').trim(),
+    par: Number.isFinite(Number(hole.par)) ? Number(hole.par) : 3,
+    feet: Number.isFinite(Number(hole.feet)) ? Number(hole.feet) : 0,
+    notes: typeof hole.notes === 'string' ? hole.notes : '',
+    rulesText,
+    img: typeof hole.img === 'string' ? hole.img : '',
+    rules: rulesTextToArray(rulesText)
+  };
+}
+
+function createLayout({ id, name, holes, order=TOM_BROWN_HOLE_ORDER }) {
+  return { id, key:id, name, order, holes: orderHolesByIds((Array.isArray(holes) ? holes : []).map(normalizeHole), order) };
+}
+
+function createCourse({ id, name, eventName, locationName, defaultLayoutId, layouts }) {
+  return { id, name, eventName, locationName, defaultLayoutId, layouts };
+}
+
+const DEFAULT_COURSE_ID = 'tom-brown-park';
+const COURSES = {
+  [DEFAULT_COURSE_ID]: createCourse({
+    id: DEFAULT_COURSE_ID,
+    name: 'Tom Brown Park',
+    eventName: '21st Open',
+    locationName: 'Tom Brown Park',
+    defaultLayoutId: 'short',
+    layouts: {
+      short: createLayout({ id:'short', name:'Short Tees', holes:SHORT_HOLES }),
+      back:  createLayout({ id:'back',  name:'Back Pad',   holes:BACK_HOLES  }),
+    }
+  })
+};
+
+// Compatibility alias while the UI is still a single-course Short/Back toggle.
+const LAYOUTS = COURSES[DEFAULT_COURSE_ID].layouts;
+
+const LAYOUT_CONFIG_KEY = 'dgc_layout_config';
+
+function layoutStoragePayload() {
+  const payload = {};
+  Object.values(COURSES).forEach(course => {
+    payload[course.id] = {};
+    Object.values(course.layouts).forEach(layout => {
+      payload[course.id][layout.id] = layout.holes.map(hole => ({
+        id: hole.id,
+        par: hole.par,
+        feet: hole.feet,
+        notes: hole.notes || '',
+        rulesText: hole.rulesText || '',
+        img: hole.img || ''
+      }));
+    });
+  });
+  return payload;
+}
+
+function saveLayoutConfig() {
+  lss(LAYOUT_CONFIG_KEY, JSON.stringify(layoutStoragePayload()));
+}
+
+function loadLayoutConfig() {
+  const cached = lsg(LAYOUT_CONFIG_KEY);
+  if (!cached) return;
+  try {
+    const raw = JSON.parse(cached);
+    if (!raw || typeof raw !== 'object') return;
+    Object.entries(raw).forEach(([courseId, courseData]) => {
+      const course = COURSES[courseId];
+      if (!course || !courseData || typeof courseData !== 'object') return;
+      Object.entries(courseData).forEach(([layoutId, holes]) => {
+        const layout = course.layouts[layoutId];
+        if (!layout || !Array.isArray(holes)) return;
+        layout.holes = orderHolesByIds(holes.map(normalizeHole).filter(h => h.id), layout.order);
+      });
+    });
+  } catch (e) {}
+}
+
+loadLayoutConfig();
+
+// ═══════════════════════════════════════════════════
+//  STATE  — all user data in one object
+// ═══════════════════════════════════════════════════
+let activeCourseId = lsg('dgc_course') || DEFAULT_COURSE_ID;
+let activeLayout = lsg('dgc_layout') || activeCourse().defaultLayoutId;
+let uname  = lsg('dgc_username');
+let cur    = 0;
+let pickerHoleId = null;
+let discSearchState = { query:'', results:[], loading:false, error:'', searched:false };
+let discSearchDebounceTimer = null;
+let discSearchRequestToken = 0;
+let discSearchAbortController = null;
+let discSearchInFlightQuery = '';
+let roundMode = false;
+let holeEditorState = { layoutId: activeLayout, holeId: null };
+const discSearchCache = new Map();
+
+const DISC_SEARCH_BUTTON_MIN_CHARS = 2;
+const DISC_SEARCH_AUTO_MIN_CHARS = 3;
+const DISC_SEARCH_DEBOUNCE_MS = 200;
+
+const GAME_PLAN_FIELDS = ['target','intent','avoid','bailout'];
+const GAME_PLAN_TARGET_OPTIONS = [
+  { value:'', label:'Select aim point' },
+  { value:'Green', label:'Green' },
+  { value:'Landing Zone', label:'Landing Zone' },
+  { value:'Center Gap', label:'Center Gap' },
+  { value:'Left Side', label:'Left Side' },
+  { value:'Right Side', label:'Right Side' },
+];
+const GAME_PLAN_INTENT_OPTIONS = [
+  { value:'', label:'Select intent' },
+  { value:'Attack', label:'Attack' },
+  { value:'Smart',  label:'Smart' },
+  { value:'Safe',   label:'Safe' },
+];
+
+function getCourse(courseId=activeCourseId) {
+  return COURSES[courseId] || COURSES[DEFAULT_COURSE_ID];
+}
+function activeCourse() { return getCourse(activeCourseId); }
+function layoutIds(courseId=activeCourseId) { return Object.keys(getCourse(courseId).layouts); }
+function activeLayoutModel(layout=activeLayout) {
+  return activeCourse().layouts[layout] || activeCourse().layouts[activeCourse().defaultLayoutId];
+}
+function ensureActiveSelection() {
+  if (!COURSES[activeCourseId]) activeCourseId = DEFAULT_COURSE_ID;
+  if (!activeCourse().layouts[activeLayout]) activeLayout = activeCourse().defaultLayoutId;
+  lss('dgc_course', activeCourseId);
+  lss('dgc_layout', activeLayout);
+}
+
+ensureActiveSelection();
+
+function createLayoutBucket(courseId=activeCourseId) {
+  return layoutIds(courseId).reduce((bucket, layout) => {
+    bucket[layout] = {};
+    return bucket;
+  }, {});
+}
+function createEmptyGamePlan() { return { target:'', intent:'', avoid:'', bailout:'' }; }
+function createEmptyPreRound() { return { todaysIntent:'', swingCue:'', mentalCue:'' }; }
+function createEmptyBag(id='bag-1', name='My Bag') {
+  return {
+    id,
+    name,
+    discs: []
+  };
+}
+function createEmptyUserData() {
+  return {
+    notes:    createLayoutBucket(),
+    gamePlan: createLayoutBucket(),
+    tags:     createLayoutBucket(),
+    bags:     {},
+    activeBagId: '',
+    bag:      []
+  };
+}
+function escapeHTML(value='') {
+  return String(value)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function normalizeLayoutBucket(bucket, courseId=activeCourseId) {
+  return layoutIds(courseId).reduce((normalized, layout) => {
+    normalized[layout] = bucket?.[layout] && typeof bucket[layout] === 'object' ? bucket[layout] : {};
+    return normalized;
+  }, {});
+}
+function normalizeDisc(disc={}) {
+  const brand = typeof disc.brand === 'string' ? disc.brand : (typeof disc.manufacturer === 'string' ? disc.manufacturer : '');
+  const mold = typeof disc.mold === 'string' ? disc.mold : (typeof disc.name === 'string' ? disc.name : '');
+  const manufacturer = typeof disc.manufacturer === 'string' ? disc.manufacturer : brand;
+  const name = typeof disc.name === 'string' ? disc.name : mold || brand || '';
+  const speed = Number.isFinite(Number(disc.speed)) ? Number(disc.speed) : 0;
+  const glide = Number.isFinite(Number(disc.glide)) ? Number(disc.glide) : 0;
+  const turn = Number.isFinite(Number(disc.turn)) ? Number(disc.turn) : 0;
+  const fade = Number.isFinite(Number(disc.fade)) ? Number(disc.fade) : 0;
+  const condition = typeof disc.condition === 'string' ? disc.condition : '';
+  const notes = typeof disc.notes === 'string' ? disc.notes : (typeof disc.dnotes === 'string' ? disc.dnotes : '');
+  const dnotes = typeof disc.dnotes === 'string' ? disc.dnotes : notes;
+  return {
+    id: String(disc.id ?? `disc-${Date.now()}`),
+    brand,
+    manufacturer,
+    mold,
+    name,
+    plastic: typeof disc.plastic === 'string' ? disc.plastic : '',
+    speed,
+    glide,
+    turn,
+    fade,
+    condition,
+    notes,
+    dnotes,
+    weight: Number.isFinite(Number(disc.weight)) ? Number(disc.weight) : 0,
+    type: typeof disc.type === 'string' ? disc.type : ''
+  };
+}
+function normalizeBag(bag={}) {
+  return {
+    id: typeof bag.id === 'string' && bag.id ? bag.id : 'bag-1',
+    name: typeof bag.name === 'string' && bag.name ? bag.name : 'My Bag',
+    discs: Array.isArray(bag.discs) ? bag.discs.map(normalizeDisc) : []
+  };
+}
+function normalizeGamePlanEntry(plan) {
+  const normalized = createEmptyGamePlan();
+  if (!plan || typeof plan !== 'object') return normalized;
+  GAME_PLAN_FIELDS.forEach(field => {
+    normalized[field] = typeof plan[field] === 'string' ? plan[field] : '';
+  });
+  return normalized;
+}
+function normalizeGamePlanBucket(bucket) {
+  const normalized = createLayoutBucket();
+  layoutIds().forEach(layout => {
+    const plans = bucket?.[layout];
+    if (!plans || typeof plans !== 'object') return;
+    Object.entries(plans).forEach(([holeId, plan]) => {
+      normalized[layout][holeId] = normalizeGamePlanEntry(plan);
+    });
+  });
+  return normalized;
+}
+
+let userData = createEmptyUserData();
+let preRound = createEmptyPreRound();
+let bagEditorState = { mode: 'create', discId: null };
+
+function holes() { return activeLayoutModel().holes; }
+function lsg(k)  { return localStorage.getItem(k); }
+function lss(k,v){ localStorage.setItem(k,v); }
+function lsr(k)  { localStorage.removeItem(k); }
+function userCacheKey(type, ...parts) {
+  if (!uname) return null;
+  return ['dgc', uname, type, ...parts].join('_');
+}
+function preRoundCacheKey() {
+  return userCacheKey('preround') || 'dgc_guest_preround';
+}
+function loadPreRoundState() {
+  const cached = lsg(preRoundCacheKey());
+  if (!cached) return createEmptyPreRound();
+  try {
+    const raw = JSON.parse(cached);
+    return {
+      todaysIntent: typeof raw?.todaysIntent === 'string' ? raw.todaysIntent : '',
+      swingCue:     typeof raw?.swingCue === 'string' ? raw.swingCue : '',
+      mentalCue:    typeof raw?.mentalCue === 'string' ? raw.mentalCue : '',
+    };
+  } catch(e) {
+    return createEmptyPreRound();
+  }
+}
+function savePreRoundState() {
+  lss(preRoundCacheKey(), JSON.stringify(preRound));
+}
+
+// ═══════════════════════════════════════════════════
+//  RESUME / RESUME PERSISTENCE
+// ═══════════════════════════════════════════════════
+function resumeCacheKey() {
+  return userCacheKey('resume') || 'dgc_guest_resume';
+}
+function saveResumeState() {
+  const key = resumeCacheKey();
+  const payload = { cur, activeCourseId, activeLayout, roundMode };
+  lss(key, JSON.stringify(payload));
+}
+function loadResumeState() {
+  const key = resumeCacheKey();
+  const cached = lsg(key);
+  if (!cached) return null;
+  try {
+    const raw = JSON.parse(cached);
+    if (raw && typeof raw === 'object') {
+      if (COURSES[raw.activeCourseId]) activeCourseId = raw.activeCourseId;
+      if (activeCourse().layouts[raw.activeLayout]) activeLayout = raw.activeLayout;
+      ensureActiveSelection();
+      if (typeof raw.roundMode === 'boolean') roundMode = raw.roundMode;
+      if (typeof raw.cur === 'number' && Number.isFinite(raw.cur)) {
+        const max = holes().length - 1;
+        if (raw.cur >= 0 && raw.cur <= max) cur = Math.min(raw.cur, max);
+      }
+    }
+    return raw;
+  } catch (e) {
+    return null;
+  }
+}
+function updatePreRoundField(field, value) {
+  if (!(field in preRound)) return;
+  preRound[field] = value;
+  savePreRoundState();
+}
+
+function normalizeData(raw) {
+  if (!raw) return createEmptyUserData();
+  // Handle previous version where notes were at root level
+  if (raw.short !== undefined || raw.back !== undefined) {
+    const legacy = createEmptyUserData();
+    legacy.notes = {
+      short: raw.short && typeof raw.short === 'object' ? raw.short : {},
+      back:  raw.back  && typeof raw.back  === 'object' ? raw.back  : {}
+    };
+    legacy.bags = { 'bag-1': createEmptyBag('bag-1', 'My Bag') };
+    legacy.activeBagId = 'bag-1';
+    legacy.bag = Array.isArray(raw.bag) ? raw.bag.map(normalizeDisc) : [];
+    legacy.bags['bag-1'].discs = legacy.bag;
+    return legacy;
+  }
+  const bags = raw.bags && typeof raw.bags === 'object'
+    ? Object.fromEntries(Object.entries(raw.bags).map(([id, bag]) => [id, normalizeBag({ ...bag, id })]))
+    : {};
+  const activeBagId = typeof raw.activeBagId === 'string' && raw.activeBagId ? raw.activeBagId : Object.keys(bags)[0] || (Array.isArray(raw.bag) ? 'bag-1' : '');
+  if (!bags[activeBagId]) {
+    bags[activeBagId || 'bag-1'] = createEmptyBag(activeBagId || 'bag-1', 'My Bag');
+  }
+  const legacyBag = Array.isArray(raw.bag) ? raw.bag.map(normalizeDisc) : [];
+  if (legacyBag.length && !bags[activeBagId].discs.length) bags[activeBagId].discs = legacyBag;
+  return {
+    notes:    normalizeLayoutBucket(raw.notes),
+    gamePlan: normalizeGamePlanBucket(raw.gamePlan),
+    tags:     normalizeLayoutBucket(raw.tags),
+    bags,
+    activeBagId,
+    bag:      bags[activeBagId]?.discs || legacyBag
+  };
+}
+
+// ═══════════════════════════════════════════════════
+//  CACHE
+// ═══════════════════════════════════════════════════
+function cacheLocally() {
+  layoutIds().forEach(layout => {
+    Object.entries(userData.notes[layout]||{}).forEach(([holeId, val]) => {
+      const key = userCacheKey('note', layout, holeId);
+      if (key) lss(key, val);
+    });
+    Object.entries(userData.gamePlan?.[layout]||{}).forEach(([holeId, val]) => {
+      const key = userCacheKey('gameplan', layout, holeId);
+      if (key) lss(key, JSON.stringify(normalizeGamePlanEntry(val)));
+    });
+  });
+  const bagKey = userCacheKey('bag');
+  if (bagKey) lss(bagKey, JSON.stringify(userData.bag || []));
+  if (userData.bags && typeof userData.bags === 'object') {
+    lss(userCacheKey('bags') || 'dgc_guest_bags', JSON.stringify(userData.bags));
+  }
+  lss(userCacheKey('activebag') || 'dgc_guest_activebag', userData.activeBagId || '');
+}
+
+function loadFromCache() {
+  layoutIds().forEach(layout => {
+    activeCourse().layouts[layout].holes.forEach(h => {
+      const noteKey = userCacheKey('note', layout, h.id);
+      const c = noteKey ? lsg(noteKey) : null;
+      if (c) { if(!userData.notes[layout]) userData.notes[layout]={}; userData.notes[layout][h.id]=c; }
+      const gamePlanKey = userCacheKey('gameplan', layout, h.id);
+      const gp = gamePlanKey ? lsg(gamePlanKey) : null;
+      if (gp) {
+        try {
+          if(!userData.gamePlan[layout]) userData.gamePlan[layout]={};
+          userData.gamePlan[layout][h.id] = normalizeGamePlanEntry(JSON.parse(gp));
+        } catch(e) {}
+      }
+    });
+  });
+  const bagsKey = userCacheKey('bags') || 'dgc_guest_bags';
+  const bagsRaw = bagsKey ? lsg(bagsKey) : null;
+  if (bagsRaw) try {
+    const bags = JSON.parse(bagsRaw);
+    if (bags && typeof bags === 'object') {
+      userData.bags = Object.fromEntries(Object.entries(bags).map(([id, bag]) => [id, normalizeBag({ ...bag, id })]));
+    }
+  } catch(e){}
+  const bagKey = userCacheKey('bag');
+  const b = bagKey ? lsg(bagKey) : null;
+  const legacyDiscs = b ? (() => { try { const discs = JSON.parse(b); return Array.isArray(discs) ? discs.map(normalizeDisc) : []; } catch(e) { return []; } })() : [];
+  const activeBagKey = userCacheKey('activebag') || 'dgc_guest_activebag';
+  const activeBagId = activeBagKey ? lsg(activeBagKey) : null;
+  userData.bags = userData.bags || {};
+  const currentBagIds = Object.keys(userData.bags || {});
+  const resolvedActiveBagId = (activeBagId && userData.bags?.[activeBagId])
+    ? activeBagId
+    : (currentBagIds[0] || 'bag-1');
+  if (!userData.bags[resolvedActiveBagId]) {
+    userData.bags[resolvedActiveBagId] = createEmptyBag(resolvedActiveBagId, 'My Bag');
+  }
+  if (legacyDiscs.length && !userData.bags[resolvedActiveBagId].discs.length) {
+    userData.bags[resolvedActiveBagId].discs = legacyDiscs;
+  }
+  userData.activeBagId = resolvedActiveBagId;
+  activeBag();
+}
+
+// ═══════════════════════════════════════════════════
+//  SYNC
+// ═══════════════════════════════════════════════════
+let saveTimer;
+async function syncUserData() {
+  if (!uname) return;
+  try {
+    await fbWrite(`users/${uname}`, userData);
+    flashSave('✓ Synced');
+  } catch {
+    flashSave('📱 Saved locally');
+  }
+}
+function queueSync(delay=1400) { clearTimeout(saveTimer); saveTimer = setTimeout(syncUserData, delay); }
+
+function flashSave(msg) {
+  const els = document.querySelectorAll('.card.active .save-status');
+  if (!els.length) return;
+  els.forEach(el => {
+    el.textContent = msg;
+    el.classList.add('show');
+  });
+  setTimeout(() => els.forEach(el => el.classList.remove('show')), 2500);
+}
+
+// ═══════════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════════
+async function handleLogin() {
+  const inp  = document.getElementById('nameInput');
+  const btn  = document.getElementById('loginBtn');
+  const name = inp.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+  if (!name) { inp.focus(); return; }
+  btn.disabled = true;
+  setLS('Connecting…');
+  try {
+    const raw = await fbRead(`users/${name}`);
+    if (raw) {
+      userData = normalizeData(raw);
+      setLS(`Welcome back, ${name}!`);
+    } else {
+      userData = createEmptyUserData();
+      await fbWrite(`users/${name}`, userData);
+    }
+    uname = name;
+    roundMode = false;
+    preRound = loadPreRoundState();
+    const resumed = loadResumeState();
+    cacheLocally();
+    lss('dgc_username', name);
+    closeLogin();
+    closeRoundSetup();
+    document.getElementById('userDisplay').textContent = uname;
+    build();
+    if (resumed && typeof resumed.cur === 'number') {
+      const hole = holes()[cur];
+      if (hole) flashSave(`Resumed on Hole ${hole.id}`);
+    }
+    fetchWind();
+  } catch(e) {
+    setLS('Connection failed — check internet and try again.', true);
+    btn.disabled = false;
+  }
+}
+
+function setLS(msg,err=false){ const el=document.getElementById('loginStatus'); el.textContent=msg; el.className='login-status'+(err?' err':''); }
+function closeLogin(){ document.getElementById('loginWrap').classList.remove('show'); }
+function showLogin() { document.getElementById('loginWrap').classList.add('show'); setTimeout(()=>document.getElementById('nameInput').focus(),100); }
+
+function switchUser() {
+  closeOverview();
+  closeRoundSetup();
+  closePicker();
+  closeDiscSearchModal();
+  closeCourseSelector();
+  closeLayoutEditor();
+  lsr('dgc_username');
+  uname=null;
+  roundMode=false;
+  preRound=createEmptyPreRound();
+  userData=createEmptyUserData();
+  document.getElementById('main').innerHTML='';
+  document.getElementById('dots').innerHTML='';
+  document.getElementById('ovGrid').innerHTML='';
+  document.getElementById('nameInput').value='';
+  cur=0;
+  showLogin();
+}
+
+// ═══════════════════════════════════════════════════
+//  NOTES
+// ═══════════════════════════════════════════════════
+function getNote(id) {
+  const key = userCacheKey('note', activeLayout, id);
+  return userData.notes[activeLayout]?.[id] ?? (key ? lsg(key) : null) ?? '';
+}
+function queueNoteSave(id, val) {
+  if (!userData.notes[activeLayout]) userData.notes[activeLayout]={};
+  userData.notes[activeLayout][id] = val;
+  const key = userCacheKey('note', activeLayout, id);
+  if (key) lss(key, val);
+  queueSync();
+}
+
+function getGamePlan(id) {
+  const plan = userData.gamePlan?.[activeLayout]?.[id];
+  if (plan) return normalizeGamePlanEntry(plan);
+  const key = userCacheKey('gameplan', activeLayout, id);
+  const cached = key ? lsg(key) : null;
+  if (!cached) return createEmptyGamePlan();
+  try {
+    return normalizeGamePlanEntry(JSON.parse(cached));
+  } catch(e) {
+    return createEmptyGamePlan();
+  }
+}
+function queueGamePlanSave(id, field, val) {
+  if (!GAME_PLAN_FIELDS.includes(field)) return;
+  if (!userData.gamePlan) userData.gamePlan = createLayoutBucket();
+  if (!userData.gamePlan[activeLayout]) userData.gamePlan[activeLayout] = {};
+  const plan = normalizeGamePlanEntry(userData.gamePlan[activeLayout][id]);
+  plan[field] = val;
+  userData.gamePlan[activeLayout][id] = plan;
+  const key = userCacheKey('gameplan', activeLayout, id);
+  if (key) lss(key, JSON.stringify(plan));
+  renderGamePlanSummary();
+  refreshRoundSnapshotIfOpen();
+  queueSync();
+}
+
+function renderSelectOptions(options, selectedValue) {
+  return options.map(option => (
+    `<option value="${escapeHTML(option.value)}"${option.value===selectedValue?' selected':''}>${escapeHTML(option.label)}</option>`
+  )).join('');
+}
+function gamePlanSectionHTML(holeId) {
+  const plan = getGamePlan(holeId);
+  return `
+    <div class="gp-grid">
+      <label class="gp-field">
+        <span class="gp-label">Aim Point</span>
+        <select class="gp-input" id="gp-target-${holeId}" data-gp-field="target">
+          ${renderSelectOptions(GAME_PLAN_TARGET_OPTIONS, plan.target)}
+        </select>
+      </label>
+      <label class="gp-field">
+        <span class="gp-label">Intent</span>
+        <select class="gp-input" id="gp-intent-${holeId}" data-gp-field="intent">
+          ${renderSelectOptions(GAME_PLAN_INTENT_OPTIONS, plan.intent)}
+        </select>
+      </label>
+      <label class="gp-field full">
+        <span class="gp-label">Avoid</span>
+        <input class="gp-input" id="gp-avoid-${holeId}" data-gp-field="avoid" type="text" placeholder="What miss brings the most trouble?" value="${escapeHTML(plan.avoid)}">
+      </label>
+      <label class="gp-field full">
+        <span class="gp-label">Bailout</span>
+        <input class="gp-input" id="gp-bailout-${holeId}" data-gp-field="bailout" type="text" placeholder="Safe miss or fallback landing area" value="${escapeHTML(plan.bailout)}">
+      </label>
+    </div>`;
+}
+function refreshGamePlanFields(holeId) {
+  const plan = getGamePlan(holeId);
+  GAME_PLAN_FIELDS.forEach(field => {
+    const input = document.getElementById(`gp-${field}-${holeId}`);
+    if (input && input.value !== plan[field]) input.value = plan[field];
+  });
+}
+function hasGamePlanValue(value) {
+  return typeof value === 'string' && value.trim() !== '';
+}
+function getActiveLayoutGamePlanSummary() {
+  const layoutHoles = holes();
+  const plans = userData.gamePlan?.[activeLayout] || {};
+  const summary = {
+    totalHoles: layoutHoles.length,
+    plannedHoles: 0,
+    aimPointsSet: 0,
+    attackCount: 0,
+    smartCount: 0,
+    safeCount: 0,
+    missingPlans: [],
+  };
+
+  layoutHoles.forEach(hole => {
+    const plan = normalizeGamePlanEntry(plans[hole.id]);
+    const hasPlan = GAME_PLAN_FIELDS.some(field => hasGamePlanValue(plan[field]));
+    if (hasPlan) summary.plannedHoles++;
+    else summary.missingPlans.push(hole.id);
+
+    if (hasGamePlanValue(plan.target)) summary.aimPointsSet++;
+    if (plan.intent === 'Attack') summary.attackCount++;
+    if (plan.intent === 'Smart')  summary.smartCount++;
+    if (plan.intent === 'Safe')   summary.safeCount++;
+  });
+
+  return summary;
+}
+function renderGamePlanSummary() {
+  const el = document.getElementById('gamePlanSummary');
+  if (!el) return;
+  const summary = getActiveLayoutGamePlanSummary();
+  const missingPlans = summary.missingPlans.length ? summary.missingPlans.join(', ') : 'None';
+
+  el.innerHTML = `
+    <div class="summary-list">
+      <div class="summary-row"><span class="summary-key">Planned Holes</span><span class="summary-val">${summary.plannedHoles} / ${summary.totalHoles}</span></div>
+      <div class="summary-row"><span class="summary-key">Aim Points Set</span><span class="summary-val">${summary.aimPointsSet}</span></div>
+      <div class="summary-row"><span class="summary-key">Attack Count</span><span class="summary-val">${summary.attackCount}</span></div>
+      <div class="summary-row"><span class="summary-key">Smart Count</span><span class="summary-val">${summary.smartCount}</span></div>
+      <div class="summary-row"><span class="summary-key">Safe Count</span><span class="summary-val">${summary.safeCount}</span></div>
+      <div class="summary-row"><span class="summary-key">Missing Plans</span><span class="summary-val missing">${escapeHTML(missingPlans)}</span></div>
+    </div>`;
+}
+
+function getTaggedDiscs(holeId, layout=activeLayout) {
+  const tagIds = userData.tags?.[layout]?.[holeId] || [];
+  return tagIds.map(id => (userData.bag||[]).find(d => d.id === id)).filter(Boolean);
+}
+function getGamePlanForLayout(holeId, layout=activeLayout) {
+  return normalizeGamePlanEntry(userData.gamePlan?.[layout]?.[holeId]);
+}
+function getGamePlanSummaryText(holeId, layout=activeLayout) {
+  const plan = getGamePlanForLayout(holeId, layout);
+  const parts = [];
+  if (hasGamePlanValue(plan.target)) parts.push(`Aim ${plan.target}`);
+  if (hasGamePlanValue(plan.intent)) parts.push(plan.intent);
+  if (hasGamePlanValue(plan.avoid)) parts.push(`Avoid ${plan.avoid}`);
+  if (hasGamePlanValue(plan.bailout)) parts.push(`Bailout ${plan.bailout}`);
+  return parts.join(' · ');
+}
+function roundFocusSectionHTML() {
+  const items = [
+    ['Today\'s Intent', preRound.todaysIntent],
+    ['Swing Cue', preRound.swingCue],
+    ['Mental Cue', preRound.mentalCue],
+  ].filter(([, value]) => value.trim() !== '');
+  if (!items.length) return '';
+  return `
+    <div class="section">
+      <div class="sec-label">Round Focus</div>
+      <div class="round-focus-grid">
+        ${items.map(([label, value]) => `
+          <div class="round-focus-item">
+            <div class="round-focus-label">${escapeHTML(label)}</div>
+            <div class="round-focus-value">${escapeHTML(value)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+function roundGamePlanSectionHTML(holeId) {
+  const plan = getGamePlan(holeId);
+  const items = [
+    ['Aim Point', plan.target],
+    ['Intent', plan.intent],
+    ['Avoid', plan.avoid],
+    ['Bailout', plan.bailout],
+  ].filter(([, value]) => hasGamePlanValue(value));
+  if (!items.length) return '<p class="round-plan-empty">No saved game plan yet. Exit Round Mode to build one.</p>';
+  return `
+    <div class="summary-list">
+      ${items.map(([label, value]) => `
+        <div class="summary-row">
+          <span class="summary-key">${escapeHTML(label)}</span>
+          <span class="summary-val">${escapeHTML(value)}</span>
+        </div>
+      `).join('')}
+    </div>`;
+}
+function collapsibleSectionHTML(label, content, open=false) {
+  return `
+    <details class="section collapsible-section"${open ? ' open' : ''}>
+      <summary class="collapsible-summary">
+        <span class="sec-label">${escapeHTML(label)}</span>
+        <span class="collapsible-hint">Tap</span>
+      </summary>
+      <div class="collapsible-body">${content}</div>
+    </details>`;
+}
+function renderRoundSnapshot() {
+  const el = document.getElementById('roundSnapshot');
+  if (!el) return;
+  const firstHole = holes()[0];
+  if (!firstHole) {
+    el.innerHTML = '<div class="round-snapshot"><div class="round-snapshot-empty">No hole data available for this layout.</div></div>';
+    return;
+  }
+  const tagged = getTaggedDiscs(firstHole.id, activeLayout);
+  const planSummary = getGamePlanSummaryText(firstHole.id, activeLayout);
+  el.innerHTML = `
+    <div class="round-snapshot">
+      <div class="round-snapshot-top">
+        <div>
+          <div class="round-snapshot-hole">Hole ${escapeHTML(firstHole.id)}</div>
+          <div class="round-snapshot-meta">Par ${firstHole.par} · ${firstHole.feet} ft · ${escapeHTML(activeLayoutModel().name)}</div>
+        </div>
+        <div class="round-snapshot-stat">
+          <strong>${firstHole.par}</strong>
+          <div class="round-snapshot-meta">Par</div>
+        </div>
+      </div>
+      <div class="round-snapshot-grid">
+        <div class="round-snapshot-item">
+          <div class="gp-label">Tagged Discs</div>
+          ${tagged.length
+            ? `<div class="disc-chips">${tagged.map(d => `<div class="disc-chip ${TYPE_CLASS[d.type]||'tp'}"><span>${escapeHTML(d.name)}</span></div>`).join('')}</div>`
+            : '<div class="round-snapshot-empty">No tagged discs on the opener yet.</div>'
+          }
+        </div>
+        <div class="round-snapshot-item">
+          <div class="gp-label">Aim / Game Plan</div>
+          <div class="${planSummary ? '' : 'round-snapshot-empty'}">${planSummary ? escapeHTML(planSummary) : 'No saved aim point or plan summary yet.'}</div>
+        </div>
+      </div>
+    </div>`;
+}
+function refreshRoundSnapshotIfOpen() {
+  if (document.getElementById('roundOverlay')?.classList.contains('open')) renderRoundSnapshot();
+}
+function renderRoundSetup() {
+  const intentInput = document.getElementById('roundIntentInput');
+  const swingInput = document.getElementById('roundSwingInput');
+  const mentalInput = document.getElementById('roundMentalInput');
+  if (intentInput) intentInput.value = preRound.todaysIntent;
+  if (swingInput) swingInput.value = preRound.swingCue;
+  if (mentalInput) mentalInput.value = preRound.mentalCue;
+  renderRoundSnapshot();
+}
+function updateRoundEntryPoint() {
+  const btn = document.getElementById('roundToggleBtn');
+  if (!btn) return;
+  btn.textContent = roundMode ? 'Exit Round' : 'Start Round';
+  btn.classList.toggle('primary', !roundMode);
+  btn.classList.toggle('round-live', roundMode);
+}
+function openRoundSetup() {
+  renderRoundSetup();
+  document.getElementById('roundOverlay').classList.add('open');
+}
+function closeRoundSetup() {
+  document.getElementById('roundOverlay').classList.remove('open');
+}
+function roundBgClose(e) {
+  if (e.target === document.getElementById('roundOverlay')) closeRoundSetup();
+}
+function enterRoundMode() {
+  roundMode = true;
+  savePreRoundState();
+  closeRoundSetup();
+  updateRoundEntryPoint();
+  saveResumeState();
+  build();
+}
+function exitRoundMode() {
+  if (!roundMode) return;
+  roundMode = false;
+  updateRoundEntryPoint();
+  saveResumeState();
+  build();
+}
+function handleRoundToggle() {
+  if (roundMode) exitRoundMode();
+  else openRoundSetup();
+}
+
+// ═══════════════════════════════════════════════════
+//  LAYOUT TOGGLE
+// ═══════════════════════════════════════════════════
+function switchLayout(layout) {
+  if (layout===activeLayout) return;
+  if (!activeCourse().layouts[layout]) return;
+  activeLayout=layout;
+  lss('dgc_layout',layout);
+  syncCourseLayoutUI();
+  document.getElementById('main').innerHTML='';
+  document.getElementById('dots').innerHTML='';
+  document.getElementById('ovGrid').innerHTML='';
+  cur=0;
+  saveResumeState();
+  build();
+  refreshRoundSnapshotIfOpen();
+}
+
+function setActiveCourseLayout(courseId, layoutId) {
+  const course = getCourse(courseId);
+  const layout = course.layouts[layoutId] ? layoutId : course.defaultLayoutId;
+  activeCourseId = course.id;
+  activeLayout = layout;
+  ensureActiveSelection();
+  syncCourseLayoutUI();
+  closeCourseSelector();
+  saveResumeState();
+  build();
+  refreshRoundSnapshotIfOpen();
+}
+
+function syncCourseLayoutUI() {
+  const course = activeCourse();
+  const layout = activeLayoutModel();
+  const courseTitle = document.getElementById('courseTitle');
+  const layoutTitle = document.getElementById('layoutTitle');
+  const selectorActive = document.getElementById('selectorActive');
+  const ltShort = document.getElementById('ltShort');
+  const ltBack = document.getElementById('ltBack');
+  if (courseTitle) courseTitle.textContent = course.name;
+  if (layoutTitle) layoutTitle.textContent = layout.name;
+  if (selectorActive) selectorActive.textContent = `${course.name} · ${layout.name}`;
+  if (ltShort) ltShort.classList.toggle('active', activeLayout === 'short');
+  if (ltBack) ltBack.classList.toggle('active', activeLayout === 'back');
+}
+
+function openCourseSelector() {
+  closeLayoutEditor();
+  renderCourseSelector();
+  document.getElementById('selectorOverlay').classList.add('open');
+}
+function closeCourseSelector() {
+  document.getElementById('selectorOverlay').classList.remove('open');
+}
+function selectorBgClose(e) {
+  if (e.target === document.getElementById('selectorOverlay')) closeCourseSelector();
+}
+function renderCourseSelector() {
+  const coursesEl = document.getElementById('selectorCourses');
+  const layoutsEl = document.getElementById('selectorLayouts');
+  if (!coursesEl || !layoutsEl) return;
+  const course = activeCourse();
+  coursesEl.innerHTML = Object.values(COURSES).map(c => `
+    <button type="button" class="selector-item${c.id===course.id?' active':''}" onclick="setActiveCourseLayout('${c.id}', '${activeLayout}')">
+      <div>
+        <div>${escapeHTML(c.name)}</div>
+        <div class="selector-meta">${escapeHTML(c.eventName)} · ${escapeHTML(c.locationName)}</div>
+      </div>
+      ${c.id===course.id ? '<span class="selector-check">Selected</span>' : ''}
+    </button>
+  `).join('');
+  layoutsEl.innerHTML = Object.values(course.layouts).map(layout => `
+    <button type="button" class="selector-item${layout.id===activeLayout?' active':''}" onclick="setActiveCourseLayout('${course.id}', '${layout.id}')">
+      <div>
+        <div>${escapeHTML(layout.name)}</div>
+        <div class="selector-meta">${escapeHTML(course.name)} · ${layout.holes.length} holes</div>
+      </div>
+      ${layout.id===activeLayout ? '<span class="selector-check">Selected</span>' : ''}
+    </button>
+  `).join('');
+  syncCourseLayoutUI();
+}
+
+function editorLayout() {
+  return activeCourse().layouts[holeEditorState.layoutId] || activeLayoutModel();
+}
+
+function editorHoles() {
+  return editorLayout().holes;
+}
+
+function holeUserCacheKeys(layoutId, holeId) {
+  return {
+    note: userCacheKey('note', layoutId, holeId),
+    gameplan: userCacheKey('gameplan', layoutId, holeId)
+  };
+}
+
+function moveHoleUserData(layoutId, fromId, toId) {
+  if (!fromId || !toId || fromId === toId) return false;
+  let changed = false;
+  ['notes', 'gamePlan', 'tags'].forEach(bucketName => {
+    const bucket = userData[bucketName]?.[layoutId];
+    if (!bucket || bucket[fromId] === undefined) return;
+    bucket[toId] = bucket[fromId];
+    delete bucket[fromId];
+    changed = true;
+  });
+  const keys = holeUserCacheKeys(layoutId, fromId);
+  const nextKeys = holeUserCacheKeys(layoutId, toId);
+  const noteVal = keys.note ? lsg(keys.note) : null;
+  if (noteVal !== null) {
+    lss(nextKeys.note, noteVal);
+    lsr(keys.note);
+    changed = true;
+  }
+  const gpVal = keys.gameplan ? lsg(keys.gameplan) : null;
+  if (gpVal !== null) {
+    lss(nextKeys.gameplan, gpVal);
+    lsr(keys.gameplan);
+    changed = true;
+  }
+  return changed;
+}
+
+function clearHoleUserData(layoutId, holeId) {
+  let changed = false;
+  ['notes', 'gamePlan', 'tags'].forEach(bucketName => {
+    const bucket = userData[bucketName]?.[layoutId];
+    if (!bucket || bucket[holeId] === undefined) return;
+    delete bucket[holeId];
+    changed = true;
+  });
+  const keys = holeUserCacheKeys(layoutId, holeId);
+  if (keys.note) lsr(keys.note);
+  if (keys.gameplan) lsr(keys.gameplan);
+  return changed;
+}
+
+function editorHoleTemplate() {
+  return normalizeHole({ id:'', par:3, feet:0, notes:'', rulesText:'', img:'' });
+}
+
+function selectEditorHole(holeId) {
+  holeEditorState.holeId = holeId;
+  renderLayoutEditorForm();
+}
+
+function newEditorHole() {
+  holeEditorState.holeId = '__new__';
+  renderLayoutEditorForm(editorHoleTemplate());
+}
+
+function resetEditorSelection() {
+  holeEditorState.holeId = null;
+  renderLayoutEditorForm(editorHoleTemplate());
+}
+
+function openLayoutEditor() {
+  closeCourseSelector();
+  holeEditorState.layoutId = activeLayout;
+  holeEditorState.holeId = editorHoles()[0]?.id || null;
+  renderLayoutEditor();
+  document.getElementById('editorOverlay').classList.add('open');
+}
+
+function closeLayoutEditor() {
+  document.getElementById('editorOverlay').classList.remove('open');
+}
+
+function editorBgClose(e) {
+  if (e.target === document.getElementById('editorOverlay')) closeLayoutEditor();
+}
+
+function renderLayoutEditor() {
+  const layout = editorLayout();
+  const subtitle = document.getElementById('editorSubtitle');
+  if (subtitle) subtitle.textContent = `${activeCourse().name} · ${layout.name}`;
+  renderLayoutEditorList();
+  renderLayoutEditorForm();
+}
+
+function renderLayoutEditorList() {
+  const list = document.getElementById('editorList');
+  if (!list) return;
+  const holes = [...editorHoles()];
+  list.innerHTML = holes.map(hole => `
+    <button type="button" class="editor-item${hole.id === holeEditorState.holeId ? ' active' : ''}" onclick="selectEditorHole('${escapeHTML(hole.id)}')">
+      <div>
+        <div>Hole ${escapeHTML(hole.id)}</div>
+        <div class="editor-item-meta">Par ${hole.par} · ${hole.feet} ft${hole.notes ? ' · notes' : ''}</div>
+      </div>
+      <div class="editor-item-actions">
+        <span class="selector-check">Edit</span>
+      </div>
+    </button>
+  `).join('') || '<div class="editor-note">No holes in this layout yet.</div>';
+}
+
+function renderLayoutEditorForm(seed=null) {
+  const layout = editorLayout();
+  const holes = editorHoles();
+  const selected = holeEditorState.holeId && holeEditorState.holeId !== '__new__'
+    ? holes.find(h => h.id === holeEditorState.holeId)
+    : null;
+  const hole = seed || selected || editorHoleTemplate();
+  const holeIdInput = document.getElementById('editorHoleId');
+  const parInput = document.getElementById('editorPar');
+  const feetInput = document.getElementById('editorFeet');
+  const notesInput = document.getElementById('editorNotes');
+  const rulesInput = document.getElementById('editorRules');
+  if (!holeIdInput || !parInput || !feetInput || !notesInput || !rulesInput) return;
+  holeIdInput.value = hole.id;
+  parInput.value = hole.par;
+  feetInput.value = hole.feet;
+  notesInput.value = hole.notes || '';
+  rulesInput.value = hole.rulesText || '';
+  const deleteBtn = document.querySelector('.editor-delete');
+  if (deleteBtn) deleteBtn.disabled = !selected;
+  const editorSubtitle = document.getElementById('editorSubtitle');
+  if (editorSubtitle) editorSubtitle.textContent = `${activeCourse().name} · ${layout.name}`;
+}
+
+function saveEditorHole() {
+  const layout = editorLayout();
+  const selected = holeEditorState.holeId && holeEditorState.holeId !== '__new__'
+    ? layout.holes.find(h => h.id === holeEditorState.holeId)
+    : null;
+  const currentId = selected?.id || '';
+  const nextId = document.getElementById('editorHoleId')?.value.trim() || '';
+  const nextPar = parseInt(document.getElementById('editorPar')?.value, 10);
+  const nextFeet = parseInt(document.getElementById('editorFeet')?.value, 10);
+  const nextNotes = document.getElementById('editorNotes')?.value || '';
+  const nextRulesText = document.getElementById('editorRules')?.value || '';
+  if (!nextId) { alert('Hole number is required.'); return; }
+  if (!Number.isFinite(nextPar) || nextPar < 1) { alert('Par must be a whole number of 1 or more.'); return; }
+  if (!Number.isFinite(nextFeet) || nextFeet < 0) { alert('Distance must be a whole number of 0 or more.'); return; }
+  const duplicate = layout.holes.some(h => h.id === nextId && h.id !== currentId);
+  if (duplicate) { alert('That hole number already exists in this layout.'); return; }
+
+  const nextHole = normalizeHole({
+    id: nextId,
+    par: nextPar,
+    feet: nextFeet,
+    notes: nextNotes,
+    rulesText: nextRulesText,
+    img: selected?.img || ''
+  });
+
+  if (selected) {
+    const idx = layout.holes.findIndex(h => h.id === currentId);
+    if (idx !== -1) layout.holes[idx] = nextHole;
+    if (currentId !== nextId) moveHoleUserData(layout.id, currentId, nextId);
+    holeEditorState.holeId = nextId;
+  } else {
+    layout.holes.push(nextHole);
+    holeEditorState.holeId = nextId;
+  }
+
+  saveLayoutConfig();
+  if (currentId !== nextId) queueSync(200);
+  syncCourseLayoutUI();
+  build();
+  renderLayoutEditor();
+}
+
+function deleteEditorHole() {
+  const layout = editorLayout();
+  const selected = holeEditorState.holeId && holeEditorState.holeId !== '__new__'
+    ? layout.holes.find(h => h.id === holeEditorState.holeId)
+    : null;
+  if (!selected) return;
+  if (layout.holes.length <= 1) { alert('Keep at least one hole in the layout.'); return; }
+  if (!confirm(`Delete hole ${selected.id} from ${layout.name}?`)) return;
+  layout.holes = layout.holes.filter(h => h.id !== selected.id);
+  clearHoleUserData(layout.id, selected.id);
+  saveLayoutConfig();
+  queueSync(200);
+  holeEditorState.holeId = layout.holes[0]?.id || null;
+  cur = 0;
+  syncCourseLayoutUI();
+  build();
+  renderLayoutEditor();
+}
+
+// ═══════════════════════════════════════════════════
+//  BAG UPLOAD & DISPLAY
+// ═══════════════════════════════════════════════════
+function activeBag() {
+  if (!userData.bags || typeof userData.bags !== 'object') userData.bags = {};
+  if (!userData.activeBagId || !userData.bags[userData.activeBagId]) {
+    const firstId = Object.keys(userData.bags)[0] || 'bag-1';
+    if (!userData.bags[firstId]) userData.bags[firstId] = createEmptyBag(firstId, 'My Bag');
+    userData.activeBagId = firstId;
+  }
+  const bag = normalizeBag(userData.bags[userData.activeBagId]);
+  userData.bags[userData.activeBagId] = bag;
+  userData.bag = bag.discs;
+  return bag;
+}
+
+function nextBagId() {
+  userData.bags = userData.bags || {};
+  let idx = 1;
+  while (userData.bags[`bag-${idx}`]) idx += 1;
+  return `bag-${idx}`;
+}
+
+function activateBag(bagId) {
+  if (!bagId) return;
+  userData.bags = userData.bags || {};
+  if (!userData.bags[bagId]) return;
+  userData.activeBagId = bagId;
+  closeManualDiscEditor();
+  activeBag();
+  syncActiveBagFields();
+  syncUserData();
+  renderBagDisplay();
+  holes().forEach(h => refreshDiscSection(h.id));
+  if (pickerHoleId) renderPickerBody();
+  refreshRoundSnapshotIfOpen();
+}
+
+function getNextActiveBagId(excludeId) {
+  const ids = Object.keys(userData.bags || {}).filter(id => id !== excludeId);
+  return ids[0] || '';
+}
+
+function syncActiveBagFields() {
+  const bag = activeBag();
+  const nameInput = document.getElementById('bagNameInput');
+  const activeLabel = document.getElementById('activeBagLabel');
+  if (nameInput && nameInput.value !== bag.name) nameInput.value = bag.name;
+  if (activeLabel) activeLabel.value = `${bag.name} (${bag.discs.length} discs)`;
+}
+
+function persistBag(discs) {
+  const bag = activeBag();
+  bag.discs = (Array.isArray(discs) ? discs : []).map(normalizeDisc);
+  userData.bags[userData.activeBagId] = bag;
+  userData.bag = bag.discs;
+  const bagKey = userCacheKey('bag');
+  if (bagKey) lss(bagKey, JSON.stringify(userData.bag));
+  syncUserData();
+  renderBagDisplay();
+  holes().forEach(h => refreshDiscSection(h.id));
+  if (pickerHoleId) renderPickerBody();
+  refreshRoundSnapshotIfOpen();
+}
+
+function createManualBag() {
+  const nameInput = document.getElementById('bagNameInput');
+  const name = (nameInput?.value || '').trim() || 'My Bag';
+  const nextId = nextBagId();
+  userData.bags = userData.bags || {};
+  userData.bags[nextId] = createEmptyBag(nextId, name);
+  userData.activeBagId = nextId;
+  closeManualDiscEditor();
+  persistBag([]);
+  syncActiveBagFields();
+}
+
+function clearActiveBag() {
+  const bag = activeBag();
+  if (!confirm(`Clear all discs from ${bag.name}?`)) return;
+  persistBag([]);
+}
+
+function openManualDiscEditor(discId = null) {
+  const form = document.getElementById('discEditorForm');
+  if (form) form.style.display = 'grid';
+  const saveBtn = document.getElementById('discSaveBtn');
+  const brand = document.getElementById('discBrandInput');
+  const mold = document.getElementById('discMoldInput');
+  const plastic = document.getElementById('discPlasticInput');
+  const weight = document.getElementById('discWeightInput');
+  const notes = document.getElementById('discNotesInput');
+  const bag = activeBag();
+  const disc = discId ? bag.discs.find(d => d.id === discId) || null : null;
+  bagEditorState = { mode: disc ? 'edit' : 'create', discId: disc ? disc.id : null };
+  if (saveBtn) saveBtn.textContent = disc ? 'Update Disc' : 'Save Disc';
+  if (brand) brand.value = disc?.brand || '';
+  if (mold) mold.value = disc?.mold || '';
+  if (plastic) plastic.value = disc?.plastic || '';
+  if (weight) weight.value = disc?.weight || '';
+  if (notes) notes.value = disc?.notes || '';
+}
+
+function closeManualDiscEditor() {
+  const form = document.getElementById('discEditorForm');
+  if (form) form.style.display = 'none';
+  const saveBtn = document.getElementById('discSaveBtn');
+  if (saveBtn) saveBtn.textContent = 'Save Disc';
+  bagEditorState = { mode: 'create', discId: null };
+}
+
+function stripDiscFromTags(discId) {
+  if (!discId || !userData.tags) return;
+  Object.values(userData.tags).forEach(layoutTags => {
+    if (!layoutTags || typeof layoutTags !== 'object') return;
+    Object.values(layoutTags).forEach(holeTags => {
+      if (!Array.isArray(holeTags)) return;
+      let idx = holeTags.indexOf(discId);
+      while (idx !== -1) {
+        holeTags.splice(idx, 1);
+        idx = holeTags.indexOf(discId);
+      }
+    });
+  });
+}
+
+function saveManualDisc() {
+  const bag = activeBag();
+  const brand = document.getElementById('discBrandInput')?.value.trim() || '';
+  const mold = document.getElementById('discMoldInput')?.value.trim() || '';
+  const plastic = document.getElementById('discPlasticInput')?.value.trim() || '';
+  const weight = parseFloat(document.getElementById('discWeightInput')?.value) || 0;
+  const notes = document.getElementById('discNotesInput')?.value.trim() || '';
+  if (!brand || !mold) { alert('Brand and mold are required.'); return; }
+  const disc = normalizeDisc({
+    id: bagEditorState.discId || `disc-${Date.now()}`,
+    brand,
+    mold,
+    plastic,
+    weight,
+    notes
+  });
+  const editingId = bagEditorState.discId && (bag.discs || []).some(item => item.id === bagEditorState.discId) ? bagEditorState.discId : null;
+  const nextDiscs = editingId
+    ? (bag.discs || []).map(item => item.id === editingId ? disc : item)
+    : [...(bag.discs || []), disc];
+  persistBag(nextDiscs);
+  closeManualDiscEditor();
+}
+
+function editManualDisc(discId) {
+  openManualDiscEditor(discId);
+}
+
+function deleteManualDisc(discId) {
+  const bag = activeBag();
+  const disc = bag.discs.find(d => d.id === discId);
+  if (!disc) return;
+  const label = [disc.brand || disc.manufacturer || '', disc.mold || disc.name || ''].filter(Boolean).join(' ') || 'this disc';
+  if (!confirm(`Delete ${label}?`)) return;
+  stripDiscFromTags(discId);
+  const nextDiscs = bag.discs.filter(d => d.id !== discId);
+  if (bagEditorState.discId === discId) closeManualDiscEditor();
+  persistBag(nextDiscs);
+}
+
+function updateActiveBagName() {
+  syncActiveBagFields();
+}
+
+function deleteBag(bagId) {
+  userData.bags = userData.bags || {};
+  const ids = Object.keys(userData.bags);
+  if (!userData.bags[bagId]) return;
+  if (ids.length <= 1) {
+    alert('You need at least one bag.');
+    return;
+  }
+  const bag = normalizeBag(userData.bags[bagId]);
+  const label = bag.name || 'this bag';
+  if (!confirm(`Delete ${label}?`)) return;
+  delete userData.bags[bagId];
+  if (userData.activeBagId === bagId) {
+    userData.activeBagId = getNextActiveBagId(bagId);
+    activeBag();
+    syncActiveBagFields();
+  }
+  userData.bag = activeBag().discs;
+  syncUserData();
+  renderBagDisplay();
+  holes().forEach(h => refreshDiscSection(h.id));
+  if (pickerHoleId) renderPickerBody();
+  refreshRoundSnapshotIfOpen();
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.trim());
+  const discs = [];
+  for (let i=1;i<lines.length;i++) {
+    if (!lines[i].trim()) continue;
+    const vals = lines[i].split(',');
+    const row = {};
+    headers.forEach((h,j)=>{ row[h]=(vals[j]||'').trim(); });
+    if (!row.name||!row.type) continue;
+    discs.push({
+      id:           row.id||String(i),
+      manufacturer: row.manufacturer||'',
+      name:         row.name,
+      type:         row.type,
+      plastic:      row.plastic||'',
+      speed:        parseFloat(row.speed)||0,
+      glide:        parseFloat(row.glide)||0,
+      turn:         parseFloat(row.turn)||0,
+      fade:         parseFloat(row.fade)||0,
+      condition:    row.condition||'',
+      dnotes:       row.notes||'',
+      weight:       parseFloat(row.weight)||0,
+    });
+  }
+  return discs;
+}
+
+function handleBagUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const discs = parseCSV(e.target.result);
+    if (discs.length===0) { alert('No discs found — make sure this is a DiscMate CSV export.'); return; }
+    persistBag(discs);
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function mapDiscItCategory(category='') {
+  const map = {
+    'Distance Driver':'Distance',
+    'Hybrid Driver':'Fairway',
+    'Control Driver':'Fairway',
+    'Midrange':'Midrange',
+    'Putter':'Putter'
+  };
+  return map[category] || category || '';
+}
+
+function parseFlightNumber(value) {
+  const num = parseFloat(value);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function formatDiscItFlight(disc) {
+  return [disc.speed, disc.glide, disc.turn, disc.fade].map(v => v ?? '—').join(' / ');
+}
+
+function bagHasDiscId(discId) {
+  return activeBag().discs.some(d => d.id === discId);
+}
+
+function normalizeDiscSearchQuery(query='') {
+  return query.trim().toLowerCase();
+}
+
+function cancelDiscSearchRequest() {
+  if (discSearchAbortController) discSearchAbortController.abort();
+  discSearchAbortController = null;
+  discSearchInFlightQuery = '';
+}
+
+function convertDiscItDisc(disc) {
+  return {
+    id:           disc.id || `discit-${Date.now()}`,
+    manufacturer: disc.brand || '',
+    name:         disc.name || 'Unknown Disc',
+    type:         mapDiscItCategory(disc.category),
+    plastic:      '',
+    speed:        parseFlightNumber(disc.speed),
+    glide:        parseFlightNumber(disc.glide),
+    turn:         parseFlightNumber(disc.turn),
+    fade:         parseFlightNumber(disc.fade),
+    condition:    '',
+    dnotes:       '',
+    weight:       0,
+  };
+}
+
+function updateDiscSearchControls() {
+  const btn = document.getElementById('discSearchBtn');
+  if (!btn) return;
+  btn.disabled = discSearchState.loading;
+  btn.textContent = discSearchState.loading ? 'Searching…' : 'Search';
+}
+
+function renderDiscSearchResults() {
+  const el = document.getElementById('discSearchResults');
+  if (!el) return;
+  updateDiscSearchControls();
+  if (discSearchState.loading) {
+    el.innerHTML = `<div class="disc-search-empty">Searching DiscIt for “${escapeHTML(discSearchState.query)}”…</div>`;
+    return;
+  }
+  if (discSearchState.error) {
+    el.innerHTML = `<div class="disc-search-empty">${escapeHTML(discSearchState.error)}</div>`;
+    return;
+  }
+  if (!discSearchState.query) {
+    el.innerHTML = '<div class="disc-search-empty">Search for a mold name like Destroyer, Hex, or Judge.</div>';
+    return;
+  }
+  if (!discSearchState.searched && discSearchState.query.length < DISC_SEARCH_BUTTON_MIN_CHARS) {
+    el.innerHTML = `<div class="disc-search-empty">Type at least ${DISC_SEARCH_BUTTON_MIN_CHARS} characters to search DiscIt.</div>`;
+    return;
+  }
+  if (!discSearchState.searched && discSearchState.query.length < DISC_SEARCH_AUTO_MIN_CHARS) {
+    el.innerHTML = `<div class="disc-search-empty">Press Search now, or keep typing for live results at ${DISC_SEARCH_AUTO_MIN_CHARS}+ characters.</div>`;
+    return;
+  }
+  if (!discSearchState.results.length) {
+    el.innerHTML = `<div class="disc-search-empty">No matches found for “${escapeHTML(discSearchState.query)}”. Try a broader name.</div>`;
+    return;
+  }
+
+  el.innerHTML = discSearchState.results.map((disc, index) => {
+    const added = bagHasDiscId(disc.id);
+    return `
+      <div class="disc-result">
+        <div class="disc-result-main">
+          <div class="disc-result-brand">${escapeHTML(disc.brand || 'Unknown Brand')}</div>
+          <div class="disc-result-name">${escapeHTML(disc.name || 'Unnamed Disc')}</div>
+          <div class="disc-result-meta">${escapeHTML(disc.category || 'Unknown Category')}</div>
+          <div class="disc-result-flight">Flight ${escapeHTML(formatDiscItFlight(disc))}</div>
+        </div>
+        <button type="button" class="disc-add-btn${added ? ' added' : ''}" onclick="addDiscItResult(${index})" ${added ? 'disabled' : ''}>${added ? 'Added' : 'Add'}</button>
+      </div>`;
+  }).join('');
+}
+
+function openDiscSearchModal() {
+  clearTimeout(discSearchDebounceTimer);
+  cancelDiscSearchRequest();
+  discSearchRequestToken++;
+  discSearchState = { query:'', results:[], loading:false, error:'', searched:false };
+  document.getElementById('discSearchOverlay').classList.add('open');
+  document.getElementById('discSearchInput').value = '';
+  renderDiscSearchResults();
+  setTimeout(() => document.getElementById('discSearchInput')?.focus(), 50);
+}
+
+function closeDiscSearchModal() {
+  clearTimeout(discSearchDebounceTimer);
+  cancelDiscSearchRequest();
+  discSearchRequestToken++;
+  document.getElementById('discSearchOverlay').classList.remove('open');
+}
+
+function discSearchBgClose(e) {
+  if (e.target === document.getElementById('discSearchOverlay')) closeDiscSearchModal();
+}
+
+function queueDiscSearch() {
+  clearTimeout(discSearchDebounceTimer);
+  const input = document.getElementById('discSearchInput');
+  if (!input) return;
+  const query = input.value.trim();
+  discSearchState = { query, results:[], loading:false, error:'', searched:false };
+  if (!query || query.length < DISC_SEARCH_AUTO_MIN_CHARS) {
+    cancelDiscSearchRequest();
+    discSearchRequestToken++;
+  }
+  renderDiscSearchResults();
+  if (!query || query.length < DISC_SEARCH_AUTO_MIN_CHARS) return;
+  discSearchDebounceTimer = setTimeout(() => executeDiscSearch(query), DISC_SEARCH_DEBOUNCE_MS);
+}
+
+function searchDiscDatabase() {
+  clearTimeout(discSearchDebounceTimer);
+  const input = document.getElementById('discSearchInput');
+  if (!input) return;
+  const query = input.value.trim();
+  discSearchState = { query, results:[], loading:false, error:'', searched:false };
+  if (!query || query.length < DISC_SEARCH_BUTTON_MIN_CHARS) {
+    cancelDiscSearchRequest();
+    discSearchRequestToken++;
+  }
+  renderDiscSearchResults();
+  if (!query || query.length < DISC_SEARCH_BUTTON_MIN_CHARS) {
+    input.focus();
+    return;
+  }
+  executeDiscSearch(query);
+}
+
+async function executeDiscSearch(query) {
+  const normalizedQuery = normalizeDiscSearchQuery(query);
+  if (!normalizedQuery) return;
+  if (discSearchInFlightQuery === normalizedQuery && discSearchAbortController) {
+    discSearchState = { query, results:[], loading:true, error:'', searched:true };
+    renderDiscSearchResults();
+    return;
+  }
+
+  const requestToken = ++discSearchRequestToken;
+  if (discSearchCache.has(normalizedQuery)) {
+    cancelDiscSearchRequest();
+    discSearchState = {
+      query,
+      results: discSearchCache.get(normalizedQuery),
+      loading:false,
+      error:'',
+      searched:true
+    };
+    renderDiscSearchResults();
+    return;
+  }
+
+  cancelDiscSearchRequest();
+  const controller = new AbortController();
+  discSearchAbortController = controller;
+  discSearchInFlightQuery = normalizedQuery;
+  discSearchState = { query, results:[], loading:true, error:'', searched:true };
+  renderDiscSearchResults();
+  try {
+    const r = await fetch(`https://discit-api.fly.dev/disc?name=${encodeURIComponent(query)}`, { signal: controller.signal });
+    if (!r.ok) throw new Error('search');
+    const data = await r.json();
+    if (requestToken !== discSearchRequestToken) return;
+    discSearchState.results = Array.isArray(data) ? data : [];
+    discSearchCache.set(normalizedQuery, discSearchState.results);
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    if (requestToken !== discSearchRequestToken) return;
+    discSearchState.error = 'Could not reach DiscIt right now. Please try again in a moment.';
+  } finally {
+    if (discSearchAbortController === controller) {
+      discSearchAbortController = null;
+      discSearchInFlightQuery = '';
+    }
+    if (requestToken !== discSearchRequestToken) return;
+    discSearchState.loading = false;
+    renderDiscSearchResults();
+  }
+}
+
+function addDiscItResult(index) {
+  const disc = discSearchState.results[index];
+  if (!disc || bagHasDiscId(disc.id)) return;
+  persistBag([...(userData.bag||[]), convertDiscItDisc(disc)]);
+  renderDiscSearchResults();
+}
+
+function renderBagDisplay() {
+  const el = document.getElementById('bagDisplay');
+  if (!el) return;
+  const bag = userData.bag||[];
+  if (bag.length===0) {
+    el.innerHTML='<p style="font-size:13px;color:var(--muted);margin-bottom:12px">No bag loaded yet. Upload your DiscMate CSV or search DiscIt below.</p>';
+    return;
+  }
+  const c={Distance:0,Fairway:0,Midrange:0,Putter:0};
+  bag.forEach(d=>{ if(c[d.type]!==undefined) c[d.type]++; else c[d.type]=(c[d.type]||0)+1; });
+  const pills=[
+    c.Distance ? `<span class="bag-pill gd">${c.Distance} Distance</span>`:'',
+    c.Fairway  ? `<span class="bag-pill gf">${c.Fairway} Fairway</span>`:'',
+    c.Midrange ? `<span class="bag-pill gm">${c.Midrange} Midrange</span>`:'',
+    c.Putter   ? `<span class="bag-pill gp">${c.Putter} Putter</span>`:'',
+  ].filter(Boolean).join('');
+  el.innerHTML=`<div class="bag-counts">${pills}</div><p style="font-size:11px;color:var(--muted);margin-bottom:12px">${bag.length} discs loaded — re-upload CSV or search DiscIt to update</p>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  DISC TAGGING
+// ═══════════════════════════════════════════════════
+function renderBagDisplay() {
+  const summaryEl = document.getElementById('bagDisplay');
+  const listEl = document.getElementById('bagManagerList');
+  if (!summaryEl || !listEl) return;
+
+  const bag = activeBag();
+  const bags = Object.values(userData.bags || {}).map(normalizeBag);
+  syncActiveBagFields();
+
+  summaryEl.innerHTML = `
+    <div class="bag-counts">
+      <span class="bag-pill gd">${bag.discs.length} Loaded</span>
+      <span class="bag-pill gf">${bags.length} Bag${bags.length === 1 ? '' : 's'}</span>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:0">Active bag: ${escapeHTML(bag.name)}</p>
+  `;
+
+  const bagRows = bags.map(b => {
+    const active = b.id === userData.activeBagId;
+    return `
+      <div class="bag-manager-item${active ? ' active' : ''}">
+        <div>
+          <div class="bag-manager-title">${escapeHTML(b.name)}</div>
+          <div class="bag-manager-meta">${b.discs.length} disc${b.discs.length === 1 ? '' : 's'}</div>
+        </div>
+        <div class="bag-editor-actions">
+          <button type="button" class="bag-editor-btn${active ? ' primary' : ''}" onclick='activateBag(${JSON.stringify(b.id)})'>${active ? 'ACTIVE' : 'USE'}</button>
+          ${bags.length > 1 ? `<button type="button" class="bag-editor-btn" onclick='deleteBag(${JSON.stringify(b.id)})'>Delete</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const activeDiscs = bag.discs.length
+    ? bag.discs.map(d => {
+        const brand = d.brand || d.manufacturer || '';
+        const mold = d.mold || d.name || '';
+        const meta = [
+          brand || null,
+          mold || null,
+          d.plastic || null,
+          Number.isFinite(Number(d.weight)) && Number(d.weight) > 0 ? `${Number(d.weight)}g` : null
+        ].filter(Boolean).join(' · ');
+        return `
+          <div class="bag-disc-item">
+            <div class="bag-disc-top">
+              <div>
+                <div class="bag-disc-name">${escapeHTML([brand, mold].filter(Boolean).join(' ') || 'Untitled disc')}</div>
+                <div class="bag-disc-meta">${escapeHTML(meta || 'No details yet')}</div>
+              </div>
+            </div>
+            ${d.notes ? `<div class="bag-disc-meta" style="margin-top:6px">${escapeHTML(d.notes)}</div>` : ''}
+            <div class="bag-editor-actions bag-disc-actions">
+              <button type="button" class="bag-editor-btn" onclick='editManualDisc(${JSON.stringify(d.id)})'>Edit</button>
+              <button type="button" class="bag-editor-btn" onclick='deleteManualDisc(${JSON.stringify(d.id)})'>Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('')
+    : '<div class="bag-manager-meta">No discs in active bag.</div>';
+
+  listEl.innerHTML = `
+    ${bagRows || '<div class="bag-manager-meta">No bags yet.</div>'}
+    <div class="bag-manager-disc">
+      <div class="bag-manager-meta">Active Bag Discs</div>
+      <div class="bag-manager-disc-list">${activeDiscs}</div>
+    </div>
+  `;
+}
+
+function discDisplayName(disc) {
+  return disc?.name || disc?.mold || disc?.brand || disc?.manufacturer || 'Untitled disc';
+}
+
+function discDisplayMeta(disc) {
+  const flight = [disc?.speed, disc?.glide, disc?.turn, disc?.fade];
+  const hasFlight = flight.some(v => Number.isFinite(Number(v)) && Number(v) !== 0);
+  return [
+    disc?.manufacturer || disc?.brand || null,
+    disc?.plastic && disc.plastic !== 'Not specified' ? disc.plastic : null,
+    hasFlight ? flight.map(v => Number.isFinite(Number(v)) ? Number(v) : '—').join(' / ') : null,
+    Number.isFinite(Number(disc?.weight)) && Number(disc.weight) > 0 ? `${Number(disc.weight)}g` : null,
+    disc?.condition && disc.condition !== 'New' ? disc.condition : null
+  ].filter(Boolean).join(' · ');
+}
+
+const TYPE_CLASS = { Distance:'td', Fairway:'tf', Midrange:'tm', Putter:'tp' };
+const TYPE_DOT   = { Distance:'dd', Fairway:'df', Midrange:'dm', Putter:'dp' };
+const TYPE_GRP   = { Distance:'gd', Fairway:'gf', Midrange:'gm', Putter:'gp' };
+const TYPE_LBL   = { Distance:'Distance Drivers', Fairway:'Fairway Drivers', Midrange:'Midranges', Putter:'Putters' };
+
+function discSectionHTML(holeId) {
+  const bag = activeBag().discs;
+  const tagIds = userData.tags?.[activeLayout]?.[holeId]||[];
+  let chipsHtml='';
+  if (tagIds.length>0) {
+    chipsHtml='<div class="disc-chips">'+tagIds.map(id=>{
+      const d=bag.find(x=>x.id===id); if(!d) return '';
+      const tc=TYPE_CLASS[d.type]||'tp';
+      return `<div class="disc-chip ${tc}"><span>${escapeHTML(discDisplayName(d))}</span><button class="chip-x" onclick="removeTag('${holeId}','${id}')">×</button></div>`;
+    }).join('')+'</div>';
+  } else {
+    chipsHtml='<p class="no-chips-msg">No disc tagged yet</p>';
+  }
+  if (bag.length>0) {
+    return chipsHtml+`<button class="tag-disc-btn" onclick="openPicker('${holeId}')">＋ Tag a Disc</button>`;
+  }
+  return `<p class="no-bag-hint" onclick="openOverview()">Upload your bag in All Holes to tag discs ↗</p>`;
+}
+
+function refreshDiscSection(holeId) {
+  const el=document.getElementById('ds-'+holeId);
+  if(el) el.innerHTML=discSectionHTML(holeId);
+}
+
+function openPicker(holeId) {
+  pickerHoleId=holeId;
+  document.getElementById('pickerSub').textContent=`Hole ${holeId} · ${activeLayoutModel().name}`;
+  renderPickerBody();
+  document.getElementById('pickerOverlay').classList.add('open');
+}
+function closePicker() { document.getElementById('pickerOverlay').classList.remove('open'); pickerHoleId=null; }
+function pickerBgClose(e) { if(e.target===document.getElementById('pickerOverlay')) closePicker(); }
+
+function renderPickerBody() {
+  const body=document.getElementById('pickerBody');
+  const bag=activeBag().discs;
+  const tagged=userData.tags?.[activeLayout]?.[pickerHoleId]||[];
+  const order=['Distance','Fairway','Midrange','Putter'];
+  let html='';
+  order.forEach(type=>{
+    const discs=bag.filter(d=>d.type===type);
+    if(!discs.length) return;
+    html+=`<div class="disc-group-hdr ${TYPE_GRP[type]}">${TYPE_LBL[type]}</div>`;
+    discs.forEach(d=>{
+      const sel=tagged.includes(d.id);
+      html+=`<div class="disc-item${sel?' sel':''}" onclick="toggleTag('${pickerHoleId}','${d.id}')">
+        <div class="disc-dot ${TYPE_DOT[d.type]||'dp'}"></div>
+        <div class="disc-info">
+          <div class="disc-iname">${escapeHTML(discDisplayName(d))}</div>
+          <div class="disc-imeta">${escapeHTML(discDisplayMeta(d))}</div>
+          ${d.dnotes||d.notes?`<div class="disc-inote">${escapeHTML(d.dnotes||d.notes)}</div>`:''}
+        </div>
+        <div class="disc-check">${sel?'✓':''}</div>
+      </div>`;
+    });
+  });
+  const uncategorized = bag.filter(d => !d.type);
+  if (uncategorized.length) {
+    html+=`<div class="disc-group-hdr gd">Bag Discs</div>`;
+    uncategorized.forEach(d=>{
+      const sel=tagged.includes(d.id);
+      html+=`<div class="disc-item${sel?' sel':''}" onclick="toggleTag('${pickerHoleId}','${d.id}')">
+        <div class="disc-dot dp"></div>
+        <div class="disc-info">
+          <div class="disc-iname">${escapeHTML(discDisplayName(d))}</div>
+          <div class="disc-imeta">${escapeHTML(discDisplayMeta(d))}</div>
+          ${d.dnotes||d.notes?`<div class="disc-inote">${escapeHTML(d.dnotes||d.notes)}</div>`:''}
+        </div>
+        <div class="disc-check">${sel?'✓':''}</div>
+      </div>`;
+    });
+  }
+  body.innerHTML=html||'<div style="padding:30px;text-align:center;color:var(--muted)">No discs in bag</div>';
+}
+
+function toggleTag(holeId, discId) {
+  if(!userData.tags) userData.tags={short:{},back:{}};
+  if(!userData.tags[activeLayout]) userData.tags[activeLayout]={};
+  if(!userData.tags[activeLayout][holeId]) userData.tags[activeLayout][holeId]=[];
+  const tags=userData.tags[activeLayout][holeId];
+  const idx=tags.indexOf(discId);
+  idx===-1 ? tags.push(discId) : tags.splice(idx,1);
+  renderPickerBody();
+  refreshDiscSection(holeId);
+  refreshRoundSnapshotIfOpen();
+  queueSync(800);
+}
+
+function removeTag(holeId, discId) {
+  if(!userData.tags?.[activeLayout]?.[holeId]) return;
+  const tags=userData.tags[activeLayout][holeId];
+  const idx=tags.indexOf(discId);
+  if(idx!==-1) tags.splice(idx,1);
+  refreshDiscSection(holeId);
+  refreshRoundSnapshotIfOpen();
+  queueSync(800);
+}
+
+// ═══════════════════════════════════════════════════
+//  WIND
+// ═══════════════════════════════════════════════════
+function degToCompass(d){ return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16]; }
+
+async function fetchWind() {
+  if(!navigator.geolocation) return;
+  const badge=document.getElementById('windBadge');
+  badge.classList.add('loading');
+  navigator.geolocation.getCurrentPosition(
+    async({coords:{latitude:lat,longitude:lon}})=>{
+      try{
+        const d=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=mph&timezone=auto`)).json();
+        document.getElementById('windSpd').textContent=Math.round(d.current.wind_speed_10m);
+        document.getElementById('windDir').textContent=degToCompass(d.current.wind_direction_10m);
+        document.getElementById('windArrow').style.transform=`rotate(${(d.current.wind_direction_10m+180)%360}deg)`;
+      }catch(e){}
+      badge.classList.remove('loading');
+    },
+    ()=>badge.classList.remove('loading')
+  );
+}
+
+// ═══════════════════════════════════════════════════
+//  BUILD
+// ═══════════════════════════════════════════════════
+const TAG={ob:['OB','tag-ob'],mando:['MANDO','tag-mando'],note:['NOTE','tag-note']};
+
+function build() {
+  const main=document.getElementById('main');
+  const dotsEl=document.getElementById('dots');
+  const grid=document.getElementById('ovGrid');
+  const layoutHoles=holes();
+  const activeIndex = Math.min(cur, Math.max(layoutHoles.length - 1, 0));
+
+  // Preload the hole art so it is ready when cards are revealed during navigation.
+  layoutHoles.forEach(h => {
+    if (!h.img) return;
+    const img = new Image();
+    img.src = h.img;
+  });
+
+  main.innerHTML='';
+  dotsEl.innerHTML='';
+  grid.innerHTML='';
+  cur = activeIndex;
+
+  syncCourseLayoutUI();
+  document.getElementById('ovTitle').textContent=`${activeLayoutModel().name} — All ${layoutHoles.length} Holes`;
+  document.getElementById('ovPar').textContent=`Course Par ${layoutHoles.reduce((s,h)=>s+h.par,0)}`;
+  document.getElementById('userDisplay').textContent=uname||'—';
+  updateRoundEntryPoint();
+  renderBagDisplay();
+  renderGamePlanSummary();
+
+  layoutHoles.forEach((h,i)=>{
+    const card=document.createElement('div');
+    card.className=`card par${h.par}${i===activeIndex?' active':''}`;
+    card.id='card-'+i;
+
+    const rulesHtml=h.rules.length
+      ? h.rules.map(r=>{const[lbl,cls]=TAG[r.t];return`<div class="rule ${r.t}"><span class="rule-tag ${cls}">${lbl}</span><span>${r.s}</span></div>`;}).join('')
+      : '<p class="no-rules">No specific local rules for this hole.</p>';
+
+    const imgHtml=h.img
+      ?`<img class="map-img" loading="eager" decoding="async" src="${h.img}" alt="Hole ${h.id}" onerror="this.outerHTML='<div class=\\'map-missing\\'><span>🗺</span>Image not found</div>'">`
+      :`<div class="map-missing"><span>📸</span>Map coming soon</div>`;
+    const rulesSection = roundMode
+      ? collapsibleSectionHTML('Course Rules', rulesHtml)
+      : `<div class="section"><div class="sec-label">Course Rules</div>${rulesHtml}</div>`;
+    const holeNotesSection = h.notes
+      ? `<div class="section"><div class="sec-label">Hole Notes</div><div class="gen-box">${escapeHTML(h.notes)}</div></div>`
+      : '';
+    const gamePlanSection = roundMode
+      ? roundGamePlanSectionHTML(h.id)
+      : gamePlanSectionHTML(h.id);
+    const notesSection = roundMode
+      ? collapsibleSectionHTML('My Notes', `
+          <textarea class="notes-ta" id="ta-${h.id}" placeholder="Line, elevation, wind effect…">${escapeHTML(getNote(h.id))}</textarea>
+          <div class="save-status"></div>
+        `)
+      : `
+        <div class="section">
+          <div class="sec-label">My Notes</div>
+          <textarea class="notes-ta" id="ta-${h.id}" placeholder="Line, elevation, wind effect…">${escapeHTML(getNote(h.id))}</textarea>
+          <div class="save-status"></div>
+        </div>`;
+
+    card.innerHTML=`
+      <div class="hero">
+        <div class="hero-num">${h.id}</div>
+        <div class="hero-meta">
+          <div class="hero-sub">${activeCourse().locationName} · ${activeLayoutModel().name}</div>
+          <div class="hero-stats">
+            <div class="stat"><div class="stat-val par-val">${h.par}</div><div class="stat-lbl">Par</div></div>
+            <div class="divider"></div>
+            <div class="stat"><div class="stat-val">${h.feet}</div><div class="stat-lbl">Feet</div></div>
+          </div>
+        </div>
+      </div>
+      ${roundMode ? roundFocusSectionHTML() : ''}
+      <div class="map-wrap">${imgHtml}</div>
+      ${rulesSection}
+      ${holeNotesSection}
+      <div class="section">
+        <div class="sec-label">Disc Selection</div>
+        <div id="ds-${h.id}">${discSectionHTML(h.id)}</div>
+      </div>
+      <div class="section">
+        <div class="sec-label">Game Plan</div>
+        ${gamePlanSection}
+        <div class="save-status"></div>
+      </div>
+      ${notesSection}
+      <div class="spacer"></div>`;
+
+    main.appendChild(card);
+    card.querySelector('.notes-ta').addEventListener('input',e=>queueNoteSave(h.id,e.target.value));
+    card.querySelectorAll('[data-gp-field]').forEach(input => {
+      const evt = input.tagName === 'SELECT' ? 'change' : 'input';
+      input.addEventListener(evt, e => queueGamePlanSave(h.id, e.target.dataset.gpField, e.target.value));
+    });
+
+    const dot=document.createElement('div');
+    dot.className=`dot p${h.par}${i===activeIndex?' active':''}`;
+    dot.id='dot-'+i; dot.onclick=()=>go(i);
+    dotsEl.appendChild(dot);
+
+    const cell=document.createElement('div');
+    cell.className=`ov-cell${i===activeIndex?' cur':''}`;cell.id='ovc-'+i;
+    cell.innerHTML=`<div class="ov-n p${h.par}">${h.id}</div><div class="ov-inf">Par ${h.par} · ${h.feet}ft</div>`;
+    cell.onclick=()=>{go(i);closeOverview();};
+    grid.appendChild(cell);
+  });
+
+  refreshNav();
+}
+
+// ═══════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════
+function go(idx){
+  ['card-','dot-','ovc-'].forEach(p=>{
+    document.getElementById(p+cur)?.classList.remove(p==='ovc-'?'cur':'active');
+    document.getElementById(p+idx)?.classList.add(p==='ovc-'?'cur':'active');
+  });
+  cur=idx;
+  document.getElementById('dot-'+cur)?.scrollIntoView({inline:'center',behavior:'smooth'});
+  document.getElementById('main').scrollTop=0;
+  refreshNav();
+  saveResumeState();
+}
+function navigate(dir){const n=cur+dir;if(n>=0&&n<holes().length)go(n);}
+function refreshNav(){
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').disabled=cur===holes().length-1;
+}
+
+// ═══════════════════════════════════════════════════
+//  OVERVIEW
+// ═══════════════════════════════════════════════════
+function openOverview()  {document.getElementById('overlay').classList.add('open'); renderBagDisplay(); renderGamePlanSummary();}
+function closeOverview() {document.getElementById('overlay').classList.remove('open');}
+function bgClose(e)      {if(e.target===document.getElementById('overlay'))closeOverview();}
+
+// ═══════════════════════════════════════════════════
+//  SWIPE + KEYBOARD
+// ═══════════════════════════════════════════════════
+let sx=0,sy=0;
+document.getElementById('main').addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+document.getElementById('main').addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.6)navigate(dx<0?1:-1);
+},{passive:true});
+document.addEventListener('keydown',e=>{
+  if (e.key==='Escape') {
+    if (document.getElementById('roundOverlay').classList.contains('open')) { closeRoundSetup(); return; }
+    if (document.getElementById('discSearchOverlay').classList.contains('open')) { closeDiscSearchModal(); return; }
+    if (document.getElementById('pickerOverlay').classList.contains('open')) { closePicker(); return; }
+    if (document.getElementById('overlay').classList.contains('open')) { closeOverview(); return; }
+  }
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);
+  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  navigate(-1);
+});
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+if (uname) {
+  loadFromCache();
+  preRound = loadPreRoundState();
+  // Restore resume state (cur, layout, round mode) if present
+  const resumed = loadResumeState();
+  build();
+  fetchWind();
+  if (resumed && typeof resumed.cur === 'number') {
+    const hole = holes()[cur];
+    if (hole) flashSave(`Resumed on Hole ${hole.id}`);
+  }
+  // Background sync from Firebase
+  fbRead(`users/${uname}`).then(raw=>{
+    if(!raw) return;
+    userData=normalizeData(raw);
+    // Refresh note textareas
+    holes().forEach(h=>{
+      const n=userData.notes?.[activeLayout]?.[h.id];
+      if(n!==undefined){
+        const ta=document.getElementById('ta-'+h.id);
+        if(ta&&ta.value!==n) ta.value=n;
+      }
+      refreshGamePlanFields(h.id);
+    });
+    // Refresh disc sections
+    holes().forEach(h=>refreshDiscSection(h.id));
+    renderBagDisplay();
+    renderGamePlanSummary();
+    refreshRoundSnapshotIfOpen();
+    cacheLocally();
+  }).catch(()=>{});
+} else {
+  showLogin();
+}
+</script>
+</body>
+</html>
